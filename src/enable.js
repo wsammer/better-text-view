@@ -1313,8 +1313,6 @@ async function start(cfg, url)
 		'AUDIO',
 		'SVG',
 		'IMG',
-		'PICTURE',
-		'FIGURE',
 		'EMBED',
 		'OBJECT',
 		'SOURCE',
