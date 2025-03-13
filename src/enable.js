@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2023-2025 Sameer W. All rights reserved.
+ * License: https://github.com/wsammer/better-text-view/blob/main/LICENSE
+ */
+
 "use strict";
 
 let namedColors = new Map(Object.entries({
@@ -372,11 +377,10 @@ function hslToRGB([h,s,l,a=1]) {
 function getHSLarr(hsl_str)
 {
 	if (hsl_str.length < 5) return [0,0,0,0];
-	let hsl = [];
-	hsl = hsl_str.match(/[\%\.\d]+/g);
-	hsl[1] = hsl[1].indexOf('%') > -1 ? parseFloat(hsl[1])/100 : hsl[1];
-	hsl[2] = hsl[2].indexOf('%') > -1 ? parseFloat(hsl[2])/100 : hsl[2];
-	hsl[3] = hsl[3] == undefined ? 1 : hsl[3];
+	let hsl = hsl_str.match(/[\%\.\d]+/g);
+	if (hsl[1].indexOf('%') > -1) hsl[1] = parseFloat(hsl[1])/100;
+	if (hsl[2].indexOf('%') > -1) hsl[2] = parseFloat(hsl[2])/100;
+	if (hsl[3] == undefined) hsl[3] = 1;
 	return hsl;
 }
 
@@ -401,10 +405,9 @@ function hexToRGBA(h,a=1) {
 function getRGBarr(rgba_str)
 {
 	if (rgba_str.length < 5) return [0,0,0,0];
-	let rgb = [];
 //		let x = rgba_str.indexOf(')');
-	rgb = rgba_str.match(/[\.\d]+/g);
-	rgb[3] = rgb[3] == undefined ? 1 : rgb[3];
+	let rgb = rgba_str.match(/[\.\d]+/g);
+	rgb[3] = rgb[3] == undefined ? 1 : rgb[3] > 1 ? rgb[3]/100 : rgb[3];
 	return rgb;
 }
 
@@ -413,7 +416,6 @@ function clamp(x, min, max) {
 }
 
 function applyColorMatrix([r, g, b]) {
-	let col = [r,g,b];
 //	const rgb = [[r / 255], [g / 255], [b / 255], [1], [1]];
 	if (g_keep_colors) return [r,g,b];
 	const rgb = [r / 255, g / 255, b / 255, 1, 1];
@@ -533,6 +535,8 @@ var g_change_vars;
 var g_min_image_size;
 var g_smaller_text;
 var g_skip_css_colors;
+var g_load_delay;
+var g_site_reminder;
 
 const focalAnchors = {};
 focalAnchors.attrNameContainer = 'f-a-h';
@@ -783,7 +787,7 @@ function invertEmojis(node) {
 		let boldNum = indx2;
 		const bold = document.createElement('span');
 		bold.textContent = word.substring(0, indx2);
-		if ((/span/i.test(tag) && /filter.*invert/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert/i.test(node.parentNode.parentNode.getAttribute('style'))))
+		if ((/span/i.test(tag) && /filter.*invert\(1/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert\(1/i.test(node.parentNode.parentNode.getAttribute('style'))))
 			bold.setAttribute('style', 'color:white!important;');
 		else
 			bold.setAttribute('style', 'filter:invert(1)!important;color:white!important;');
@@ -1289,6 +1293,12 @@ async function init()
 	start(cfg);
 }
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+async function waitDelay(sec) {
+	await delay(sec);
+	return;
+}
+
 async function start(cfg, url)
 {
 	css_node.nodeValue = getCSS(cfg);
@@ -1535,6 +1545,14 @@ async function start(cfg, url)
 	g_min_image_size = docs.getPropertyValue('--g_min_image_size');
 	else
 	g_min_image_size = 199;
+	if (docs.getPropertyValue('--g_load_delay'))
+	g_load_delay = docs.getPropertyValue('--g_load_delay');
+	else
+	g_load_delay = 0;
+	if (docs.getPropertyValue('--g_site_reminder'))
+	g_site_reminder = docs.getPropertyValue('--g_site_reminder');
+	else
+	g_site_reminder = '';
 
 	if (docs.getPropertyValue('--g_skip_colors_classes')) {
 		let skipcols = docs.getPropertyValue('--g_skip_colors_classes');
@@ -1616,6 +1634,21 @@ async function start(cfg, url)
 		g_svg_bg_white = false;
 		g_change_vars = false;
 		g_min_image_size = 199;
+		g_load_delay = 0;
+		g_site_reminder = '';
+	}
+
+	if (g_load_delay > 0) {
+		await waitDelay(g_load_delay);
+		console.log('Delay of '+g_load_delay+'ms done');
+		nodes = Array.from(document.body.getElementsByTagName('*'));
+	}
+
+	if (g_site_reminder) {
+		var txt,txt2;
+		txt2 = g_site_reminder.replaceAll(/\\n/g,'\n');
+		if (txt2[0] == "\'" || txt2[0] == '\"') txt = txt2.substr(1,txt2.length-2);
+		alert('REMINDER for site : '+g_url+'\n\n'+txt+'\n\nTo remove this reminder, edit custom CSS of this site in Better Text View.');
 	}
 
 	let colors_to_skip  = [
@@ -1738,11 +1771,11 @@ async function start(cfg, url)
 					col = rule.style.getPropertyValue(attr);
 					var_match = col.match(/var\(/g) ? col.match(/var\(/g).length : 0;
 					if (var_match == 1 && col.substr(0,4).indexOf('var(') > -1) {
-					aaa = col.replace(/var\(/,'').replace(/[\)\,].*/,'').trim();
+					aaa = col.replace(/var\(/,'').replace(/[\)\,\/].*/,'').trim();
 					attr = aaa;
 					bbb = root_style.getPropertyValue(aaa) || rule.style.getPropertyValue(aaa);
 					if (!(bbb && bbb.length)) {
-						aaa = col.replace(/.*?var\([^\,]*\,([^\)]+\)).*$/,`$1`).trim();
+						aaa = col.replace(/.*?var\([^\,\/]*[\,\/]([^\)]+\)).*$/,`$1`).trim();
 						bbb = aaa;
 						if (aaa.indexOf('(') < 0 && aaa.indexOf(')') > -1) bbb = aaa.replace(/\)+/g,'');
 						aaa = attr;
@@ -1757,7 +1790,7 @@ async function start(cfg, url)
 					}
 					} else if (var_match > 0 && g_skip_css == 1998) {
 					
-					val = col.replace(/\s+/g,'').trim();
+					//val = col.replace(/\s+/g,'').trim();
 					chg_var = chg_var ? 0 : -999;
 					attr2 = attr;
 					let n_iter = 0;
@@ -1769,14 +1802,16 @@ async function start(cfg, url)
 						ccc = val.indexOf('var(')+4;
 						aaa = val.substr(ccc).indexOf(')');
 						bbb = val.substr(ccc).indexOf(',');
+						let bbb2 = val.substr(ccc).indexOf('/');
 						opt_val = 0;
-						if (bbb < aaa && bbb != -1) {
+						if ((bbb < aaa && bbb > -1) || (bbb2 < aaa && bbb2 > -1)) {
 						opt_val = 1;
+						if (bbb < 0) bbb = bbb2;
 						aaa = val.substr(ccc,bbb).trim();
 						attr = aaa;
 						bbb = rule.style.getPropertyValue(aaa) || root_style.getPropertyValue(aaa);
 						if (!(bbb && bbb.length)) {
-						aaa = val.replace(/var\([^\,\)]*?[\)\,]([^\)]*?)\)/,`$1`).trim();
+						aaa = val.replace(/var\([^\,\)\/]*?[\)\,\/]([^\)]*?)\)/,`$1`).trim();
 						//if (/^var\(/.test(aaa)) aaa = aaa.replace(/^var\(/,'');
 						opt_val++;
 						if (aaa.indexOf('var(') < 0) {
@@ -2045,7 +2080,7 @@ async function start(cfg, url)
 				}
 		}
 		if (cfg.forcePlhdr && cfg.forceIInv) {
-		if (rule.style.content && !/invert/i.test(rule.style.filter) && /url\(/i.test(rule.style.content))
+		if (rule.style.content && !/invert\(1/i.test(rule.style.filter) && /url\(/i.test(rule.style.content))
 			rule.style.setProperty('filter','invert(1)','important');
 		}
 		}
@@ -2280,7 +2315,7 @@ async function start(cfg, url)
 			nn_reg = /revert/g;
 		} else if (cfg.forcePlhdr && cfg.forceIInv) {
 			nn_style = ';filter:invert(1)!important;';
-			nn_reg = /invert/g;
+			nn_reg = /invert\(1/g;
 		} else {
 			nn_style = '';
 			nn_reg = /\<\&\%/;
@@ -2403,13 +2438,13 @@ async function start(cfg, url)
 				}
 				}
 			}
-			if (n.getAttribute('_btvdone_')) nodes_to_skip.push(n);
+			//if (n.getAttribute('_btvdone_')) nodes_to_skip.push(n);
 			if (tags_to_skip.includes(t) || (cfg.skipHeadings && hdr_tags.includes(t))) {
 				nodes_to_skip.push(n);
 				nodes_to_skip.push(...Array.from(chln));
 			}
 			let tn = n.textContent || n.nodeValue || n.value;
-			if (tn && tn != undefined)
+			if (tn && tn != undefined && tn.trim)
 				b_ctext[nc] = tn.trim().length;
 			else
 				b_ctext[nc] = 0;
@@ -2464,7 +2499,7 @@ async function start(cfg, url)
 						n.setAttribute('class', n.className+ ' _btvfonta_ ');
 					else
 						n.setAttribute('class', ' _btvfonta_ ');
-			if (cfg.advDimming || (cfg.forcePlhdr && parentStyle(n, /invert/g, nodes_behind_inv)))
+			if (cfg.advDimming || (cfg.forcePlhdr && parentStyle(n, /invert\(1/g, nodes_behind_inv)))
 				document.documentElement.style.setProperty('--g_beforeafter_color','#fff');
 			else
 				document.documentElement.style.setProperty('--g_beforeafter_color','#000');
@@ -2483,7 +2518,7 @@ async function start(cfg, url)
 			}
 			if (mutation)
 			if (cfg.forcePlhdr && cfg.normalInc) {
-				let ps = parentStyle(n,/invert/g,nodes_behind_inv);
+				let ps = parentStyle(n,/invert\(1/g,nodes_behind_inv);
 				if (ps) nodes_behind_inv.push(...Array.from(chln));
 			}
 			}
@@ -2638,7 +2673,7 @@ async function start(cfg, url)
 
 			var htm;
 			htm = pnode;
-			if (htm.style.getPropertyValue('filter').indexOf('invert') < 0)
+			if (htm.style.getPropertyValue('filter').indexOf('invert\(1') < 0)
 				htm.style.setProperty('filter','invert(1)','important');
 			if (cfg.forceIInv) {
 			var hdrs;
@@ -2673,7 +2708,7 @@ async function start(cfg, url)
 			let sects = Array.from(img.getElementsByTagName('SECTION'));
 			let arts =  Array.from(img.getElementsByTagName('ARTICLE'));
 			if (sects.length > 2 || arts.length > 2 || img == footr) continue;
-			let p_s = parentStyle(img,/invert/g,nodes_behind_inv);
+			let p_s = parentStyle(img,/invert\(1/g,nodes_behind_inv);
 			if (p_s) {
 				img.style.setProperty('filter','unset', 'important');
 				continue;
@@ -2807,6 +2842,7 @@ async function start(cfg, url)
 				let lastn = pn;
 				while (pn && !/\b(BODY|HTML)/i.test(pn.nodeName)) {
 					lastn = pn;
+					if (pn instanceof Element) {
 					let nsty = lastn.getAttribute('style');
 					if (!b_iimg[map.get(lastn)] && nsty != null && !nn_reg.test(nsty) && ((nsty+nn_style).length > 0))
 						//lastn.setAttribute('style',nsty+nn_style);
@@ -2816,6 +2852,7 @@ async function start(cfg, url)
 						//lastn.setAttribute('style',nn_style);
 					let cn = map.get(lastn);
 					b_dim[cn] = true;
+					}
 					pn = lastn.parentNode;
 				}
 				node = lastn;
@@ -2842,7 +2879,7 @@ async function start(cfg, url)
 			if (/I?FRAME\b/i.test(tag)) {
 				let fsty = node.style.getPropertyValue('filter');
 				if (fsty == null) fsty = '';
-				if (!/invert/g.test(fsty) && cfg.forcePlhdr)
+				if (!/invert\(1/g.test(fsty) && cfg.forcePlhdr)
 					node.style.setProperty('filter','invert(1)','important');
 			}
 
@@ -2912,7 +2949,7 @@ async function start(cfg, url)
 				} else if (!nodes_behind_inv.includes(node)) {
 					nodes_behind_inv.push(node);
 				}
-			} else if (!nimp && !ftr && (!b_iimg[node_count] || style.filter.indexOf('invert') < 0) && !g_n_inv) {
+			} else if (!nimp && !ftr && (!b_iimg[node_count] || style.filter.indexOf('invert\(1') < 0) && !g_n_inv) {
 				var cs,pcs;
 				let err = false;
 				try {
@@ -3411,7 +3448,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindFg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
+						pcol = colorblindFg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3430,7 +3467,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindBg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
+						pcol = colorblindBg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3450,7 +3487,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindFg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
+						pcol = colorblindFg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3625,7 +3662,7 @@ async function start(cfg, url)
 				fg_brt = 255;
 			}
 
-			let bg_threshold = g_bg_threshold - cfg.strength;
+			let bg_threshold = cfg.strength*1 + g_bg_threshold*1;
 
 			let contrast = Math.abs(bg_brt - fg_brt);
 
@@ -3637,7 +3674,7 @@ async function start(cfg, url)
 					return;
 			}
 
-			if (bg_brt > bg_threshold) {
+			if (bg_threshold > fg_brt) {
 				let bstl = '';
 				if (fg_brt < bg_brt)
 					bstl = 'rgb(0, 0, 0)';
@@ -3657,13 +3694,13 @@ async function start(cfg, url)
 		};
 
 		const iterateBigArr = (arr) => {
+			if (doc_obs != undefined && doc_obs != null)
+				doc_obs.disconnect();
 			for (let el of arr) {
-				if (doc_obs != undefined && doc_obs != null)
-					doc_obs.disconnect();
 				setAttribs(el);
-				if (doc_obs != undefined && doc_obs != null)
-					doc_obs.observe(document.body, { childList: true, subtree: true });
 			}
+			if (doc_obs != undefined && doc_obs != null)
+				doc_obs.observe(document.body, { childList: true, subtree: true });
 		}
 
 		iterateBigArr(nodes);
@@ -3708,7 +3745,7 @@ async function start(cfg, url)
 				while (pch && !/^(BODY|HTML)$/i.test(pch.nodeName)) {
 					if (c instanceof Element) {
 						new_nodes.push(c);
-						c.setAttribute('_btvdone_','1');
+						//c.setAttribute('_btvdone_','1');
 					}
 					c = pch;
 					pch = pch.parentNode;

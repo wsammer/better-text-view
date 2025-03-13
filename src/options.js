@@ -1,4 +1,9 @@
-"use strict";
+/**
+ * Copyright (C) 2023-2025 Sameer W. All rights reserved.
+ * License: https://github.com/wsammer/better-text-view/blob/main/LICENSE
+ */
+
+'use strict';
 
 let doc = document;
 var fileListb = [];
