@@ -65,6 +65,9 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>New variable '--g_site_reminder' which can be set in site's Custom CSS and gets displayed in an alert box popup on visiting site.<br>Example setting for custom CSS : <br><code>html { --g_site_reminder: 'Get items\n1 Bread\n2 Milk\n3 Eggs\n'; }</code><br>Newlines have to be entered as '\n'. Text should be within quotes ('' or "").</li>
+<li>"Strength" slider value added to '--g_bg_threshold' value total are compared with text color brightness, and if total is more than text brightness, the text color is made 'high contrast' (black if total less than background brightness, or white if total more than background brightness).<br>Previously, strength was subtracted from '--g_bg_threshold' and compared with background brightness, causing odd values of strength and text contrast.</li>
+<li>New setting '--g_load_delay' which delays start of processing by milliseconds of its value.</li>
 <li>Add 'unset / currentcolor / none / revert' to colors to skip in hue correction and setting contrast.</li>
 <li>Bugs fixed. In hue correction of reverse colors, slightly complex CSS variable values for color / background / border can be processed by setting '--g_skip_css' to 1998. If the color variables values have only one variable and start with 'var(', they are processed even without setting the variable '--g_skip_css' ( to 1998 ).</li>
 <li>Reverse colors tries to preserve background colors / image within limits. Addtional settings for keeping background colors / image are :<br><code>html { --g_min_image_size: -1; --g_min_colorfulness: -1; }</code><br>or use only one of g_min_image_size / g_min_colorfulness, and<br><code>body { backdrop-filter: invert(1); }</code><br>when none of above work.</li>
