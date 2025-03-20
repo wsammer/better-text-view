@@ -1687,6 +1687,8 @@ async function start(cfg, url)
 	let b_sec = false;
 	let body_nfz = 16;
 	let b_bdone = false;
+	let b_skip_css_cond1 = /1998/.test(g_skip_css);
+	let b_skip_css_cond2 = b_skip_css_cond1 || g_skip_css == false;
 	let m_ssdone = {};
 	let bdy_classid = [];
 	let bimp = g_keep_colors ? 'important' : '';
@@ -1788,7 +1790,7 @@ async function start(cfg, url)
 					} else {
 						val = bbb;
 					}
-					} else if (var_match > 0 && g_skip_css == 1998) {
+					} else if (var_match > 0 && b_skip_css_cond1) {
 					
 					//val = col.replace(/\s+/g,'').trim();
 					chg_var = chg_var ? 0 : -999;
@@ -1941,7 +1943,7 @@ async function start(cfg, url)
 				}
 
 
-			if ((g_skip_css != 99 || cfg.pseudoAB) && !(/\b(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)\b/i.test(key) || (rule.style.backgroundImage && /(\/|http|url)/i.test(rule.style.backgroundImage)) || (rule.style.src && /(\/|http|url)/i.test(rule.style.src))))
+			if ((b_skip_css_cond2 || cfg.pseudoAB) && !(/\b(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)\b/i.test(key) || (rule.style.backgroundImage && /(\/|http|url)/i.test(rule.style.backgroundImage)) || (rule.style.src && /(\/|http|url)/i.test(rule.style.src))))
 			if (/\:(after|before|hover|selection)\b/i.test(key)) {
 				if (rule.style.color && rule.style.color.indexOf('calc\(') < 0) {
 					let ret = setRuleColor(rule,'color',rule.style.color,g_change_vars);
@@ -1980,7 +1982,7 @@ async function start(cfg, url)
 						}
 					}
 				}
-			} else if ((g_skip_css == false || g_skip_css == 1998) && !/\:(after|before|hover|selection)\b/i.test(key)) {
+			} else if (b_skip_css_cond2 && !/\:(after|before|hover|selection)\b/i.test(key)) {
 			if (rule.style.color && rule.style.color.indexOf('calc\(') < 0) {
 			let ret = setRuleColor(rule,'color',rule.style.color,g_change_vars);
 			if (ret && ret != undefined && ret[0] != undefined && ret[1] != undefined) {
@@ -2125,7 +2127,7 @@ async function start(cfg, url)
 		style_node.sheet.insertRule(fntFmly, 0);
 	}
 
-		if (cfg.forcePlhdr && cfg.normalInc) {
+		if (cfg.forcePlhdr && cfg.normalInc && !/emo/.test(g_skip_css)) {
 		let ms = null;
 		let cmap = [];
 		b_noemo = false;
@@ -2134,7 +2136,10 @@ async function start(cfg, url)
 		if (ms) {
 			var totemo = '';
 			for (let str of ms) { totemo += str; if(!cmap.includes(str)) cmap.push(str); }
-			if (totemo.replaceAll(/[®©✓✔✕✖✗✘]+/mgu, '').length < 3) b_noemo = true;
+			let brepl = totemo;
+			if (totemo.replaceAll(/[®©✓✔✕✖✗✘]+/mgu, '').length < 2)
+				if (brepl.indexOf('®') > -1 || brepl.indexOf('©') > -1)
+					b_noemo = true;
 		} else {
 			b_noemo = true;
 		}
