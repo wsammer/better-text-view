@@ -65,6 +65,7 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>Setting '--g_skip_css' to 'emo' (or '1998 emo' / 'emo 1998' to enable complex CSS color variables) will disable hue correction for emojis in reverse colors, which is enabled by default.</li>
 <li>New variable '--g_site_reminder' which can be set in site's Custom CSS and gets displayed in an alert box popup on visiting site.<br>Example setting for custom CSS : <br><code>html { --g_site_reminder: 'Get items\n1 Bread\n2 Milk\n3 Eggs\n'; }</code><br>Newlines have to be entered as '\n'. Text should be within quotes ('' or "").</li>
 <li>"Strength" slider value added to '--g_bg_threshold' value total are compared with text color brightness, and if total is more than text brightness, the text color is made 'high contrast' (black if total less than background brightness, or white if total more than background brightness).<br>Previously, strength was subtracted from '--g_bg_threshold' and compared with background brightness, causing odd values of strength and text contrast.</li>
 <li>New setting '--g_load_delay' which delays start of processing by milliseconds of its value.</li>
@@ -148,12 +149,12 @@
 <li>Text contrast can be increased by the 'Strength' slider, with high positive values making text more black / white and negative values keeping text color unchanged.<br>The strength slider also determines the Zoom %, with default zero strength giving 175% (1.75) zoom value.</li>
 <li>Font Weight slider changes thin/bold-ness of ALL text, and bold and normal letters weight when "Start 3 letters bold" is enabled.</li>
 <li>Dark mode changes Contrast and Brightness of "black" themed sites. Pictures are kept normal but if "High contrast dark mode" is enabled, the brightness / contrast effect is greater and images get distorted colors. See image below
-<figure><figcaption>Dark mode with High contrast option enabled and brightness / contrast at non-default values (github.com).</figcaption>
+<figure><figcaption>Dark mode with High contrast option enabled and brightness / contrast at non-default values.</figcaption>
 <img class="img_help" id="high-contrast" src="assets/icons/high-contrast-dark-mode.png" style="width:50%;" title="High contrast option in Dark mode" ></figure>
 </li>
 <li>In Dark mode and Reverse colors the text (and some background) brightness and contrast can be changed by their sliders.</li>
 <li>The "Force Reverse Colors" option is useful for changing colors of sites to "Dark Theme" or "Dark Reader" view while preserving (most of) images' colors and background and text colors. Image colors are made normal by enabling "Invert image colors" and text / background colors similar to original by enabling "Reverse Colors hue correction". See image below
-<figure><figcaption>Reverse colors of white background light theme page with ALL CAPS & start 3 letters bold enabled (wikipedia.org)</figcaption>
+<figure><figcaption>Reverse colors of white background light theme page with ALL CAPS & start 3 letters bold enabled.</figcaption>
 <img class="img_help" id="reverse-colors" src="assets/icons/reverse-colors.png" style="width:50%;" title="Reverse Colors with ALL CAPS and start 3 bold on wikipedia page" ></figure>
 </li>
 <li>ALL CAPITAL TEXT option makes all webpage text in capitals and also works on NON-ENGLISH languages.<a href="#reverse-colors">See above image.</a></li>
