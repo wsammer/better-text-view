@@ -537,6 +537,7 @@ var g_smaller_text;
 var g_skip_css_colors;
 var g_load_delay;
 var g_site_reminder;
+var g_max_text;
 
 const focalAnchors = {};
 focalAnchors.attrNameContainer = 'f-a-h';
@@ -1516,8 +1517,10 @@ async function start(cfg, url)
 	if (docs.getPropertyValue('--g_load_crossorigin')) {
 	g_load_crossorigin = docs.getPropertyValue('--g_load_crossorigin');
 	if (g_load_crossorigin == 'false') g_load_crossorigin = false;
+	g_max_text = parseInt(g_load_crossorigin);
 	} else {
 	g_load_crossorigin = false;
+	g_max_text = 95;
 	}
 	if (docs.getPropertyValue('--g_keep_colors')) {
 	g_keep_colors = docs.getPropertyValue('--g_keep_colors');
@@ -1636,6 +1639,7 @@ async function start(cfg, url)
 		g_min_image_size = 199;
 		g_load_delay = 0;
 		g_site_reminder = '';
+		g_max_text = 95;
 	}
 
 	if (g_load_delay > 0) {
@@ -2731,14 +2735,14 @@ async function start(cfg, url)
 			if (!imsrc || imsrc == 'none')
 				imsrc = '';
 			if (!/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/i.test(img.nodeName) && !bgim && !imsrc) { b_iimg[n_c] = false; continue; }
-			if (!b_imgforce[n_c] || b_ctext[n_c] > 95)
+			if (!b_imgforce[n_c] || b_ctext[n_c] > g_max_text)
 			if (!/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/i.test(img.nodeName))
-			if (!/(background.*page|banner|page.*background|slide)/ig.test(img.className) && ((imsrc != undefined && imsrc && imsrc != 'none' && !/(\/|http|url)/ig.test(imsrc)) || (bgim != undefined && bgim != '' && bgim != 'none' && !/(\/|http|url)/ig.test(bgim)) || (b_ctext[n_c] > 95 && !b_imgforce[n_c])) || (((img_area[n_c] > 0 && img_area[n_c] < g_min_image_size && img.textContent.indexOf(' ') > -1 && !/button/i.test(img.className)) || /nav/i.test(img.className)) && !b_imgforce[n_c] && img_area[n_c] < g_min_image_size && img_area[n_c] > 0)) {
+			if (!/(background.*page|banner|page.*background|slide)/ig.test(img.className) && ((imsrc != undefined && imsrc && imsrc != 'none' && !/(\/|http|url)/ig.test(imsrc)) || (bgim != undefined && bgim != '' && bgim != 'none' && !/(\/|http|url)/ig.test(bgim)) || (b_ctext[n_c] > g_max_text && !b_imgforce[n_c])) || (((img_area[n_c] > 0 && img_area[n_c] < g_min_image_size && img.textContent.indexOf(' ') > -1 && !/button/i.test(img.className)) || /nav/i.test(img.className)) && !b_imgforce[n_c] && img_area[n_c] < g_min_image_size && img_area[n_c] > 0)) {
 				if (!(hdr && hdr.contains(img))) {
 				img.style.setProperty('filter','unset', 'important');
 				continue;
 				}
-			} else if (b_ctext[n_c] > 95 && (img_area[n_c] <= 50000 || !b_imgforce[n_c])) {
+			} else if (b_ctext[n_c] > g_max_text && (img_area[n_c] <= 50000 || !b_imgforce[n_c])) {
 				img.style.setProperty('filter','unset', 'important');
 				continue;
 			}
