@@ -788,10 +788,10 @@ function invertEmojis(node) {
 		let boldNum = indx2;
 		const bold = document.createElement('span');
 		bold.textContent = word.substring(0, indx2);
-		if ((/span/i.test(tag) && /filter.*invert\(1/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert\(1/i.test(node.parentNode.parentNode.getAttribute('style'))))
+		if ((/span/i.test(tag) && /filter.*invert/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert/i.test(node.parentNode.parentNode.getAttribute('style'))))
 			bold.setAttribute('style', 'color:white!important;');
 		else
-			bold.setAttribute('style', 'filter:invert(1)!important;color:white!important;');
+			bold.setAttribute('style', 'filter:var(--g_filter_invert)!important;color:white!important;');
 		node.parentNode.insertBefore(bold, node);
 		node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum)+' '), node);
 		matches.length = 0;
@@ -1304,10 +1304,6 @@ async function start(cfg, url)
 {
 	css_node.nodeValue = getCSS(cfg);
 
-/**	for (let s of document.getElementsByTagName('STYLE')) {
-		css_node.nodeValue += s.innerHTML;
-	}*/
-
 	let nodes = [];
 
 	if (document.body)
@@ -1424,20 +1420,23 @@ async function start(cfg, url)
 	}
 	}
 
+	if (cfg.forcePlhdr && cfg.forceIInv)
+		document.documentElement.style.setProperty('--g_filter_invert','invert(0)');
+
 	let style_rule = "";
 	if (cfg.forcePlhdr && cfg.forceIInv) {
-	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'] { filter:invert(1); }";
-	style_rule += "._btvinvertb_:before,._btvinverta_:after { filter:invert(1); }";
-	style_rule += "[style*='background-image:url'],[style*='background-image:var'],[style*='background-image: url'],[style*='background-image: var']  { filter:invert(1); }";
+	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'] { filter:var(--g_filter_invert); }";
+	style_rule += "._btvinvertb_:before,._btvinverta_:after { filter:var(--g_filter_invert); }";
+	style_rule += "[style*='background-image:url'],[style*='background-image:var'],[style*='background-image: url'],[style*='background-image: var']  { filter:var(--g_filter_invert); }";
+	style_rule += "[style*='background:url'],[style*='background: url'] { filter:var(--g_filter_invert); }";
 	style_rule += "body[style*='background-image:url'],body[style*='background-image:var'],body[style*='background-image: url'],body[style*='background-image: var'] { filter:unset!important; }";
 	style_rule += "[style*='background-image:none'],[style*='background-image: none'] { filter:unset!important; }";
-	style_rule += "frame,iframe { filter:invert(1); }";
+	style_rule += "frame,iframe { filter:var(--g_filter_invert); }";
 	}
 	if (cfg.pseudoAB)
 		style_rule += "._btvfontb_:before,._btvfonta_:after { font-size:"+cfg.threshold+"px !important; color: var(--g_beforeafter_color) !important; }";
 
-	if (g_anegative != true)
-		css_node.nodeValue += style_rule;
+	css_node.nodeValue += style_rule;
 
 	style_node.appendChild(css_node);
 
@@ -2086,8 +2085,8 @@ async function start(cfg, url)
 				}
 		}
 		if (cfg.forcePlhdr && cfg.forceIInv) {
-		if (rule.style.content && !/invert\(1/i.test(rule.style.filter) && /url\(/i.test(rule.style.content))
-			rule.style.setProperty('filter','invert(1)','important');
+		if (rule.style.content && !/invert/i.test(rule.style.filter) && /url\(/i.test(rule.style.content))
+			rule.style.setProperty('filter','var(--g_filter_invert)','important');
 		}
 		}
 		if (!b_sec && txtrul) {
@@ -2324,7 +2323,7 @@ async function start(cfg, url)
 			nn_reg = /revert/g;
 		} else if (cfg.forcePlhdr && cfg.forceIInv) {
 			nn_style = ';filter:invert(1)!important;';
-			nn_reg = /invert\(1/g;
+			nn_reg = /invert/g;
 		} else {
 			nn_style = '';
 			nn_reg = /\<\&\%/;
@@ -2508,7 +2507,7 @@ async function start(cfg, url)
 						n.setAttribute('class', n.className+ ' _btvfonta_ ');
 					else
 						n.setAttribute('class', ' _btvfonta_ ');
-			if (cfg.advDimming || (cfg.forcePlhdr && parentStyle(n, /invert\(1/g, nodes_behind_inv)))
+			if (cfg.advDimming || (cfg.forcePlhdr && parentStyle(n, /invert/g, nodes_behind_inv)))
 				document.documentElement.style.setProperty('--g_beforeafter_color','#fff');
 			else
 				document.documentElement.style.setProperty('--g_beforeafter_color','#000');
@@ -2527,7 +2526,7 @@ async function start(cfg, url)
 			}
 			if (mutation)
 			if (cfg.forcePlhdr && cfg.normalInc) {
-				let ps = parentStyle(n,/invert\(1/g,nodes_behind_inv);
+				let ps = parentStyle(n,/invert/g,nodes_behind_inv);
 				if (ps) nodes_behind_inv.push(...Array.from(chln));
 			}
 			}
@@ -2545,6 +2544,8 @@ async function start(cfg, url)
 			let tc = 111111;
 			let tn = n;
 			for (n of t) {
+				let gcs = getComputedStyle(n);
+				if (parseInt(gcs.height) == 0 || parseInt(gcs.width) == 0) continue;
 				let c = topNode(n);
 				if (c < tc) {
 					tc = c;
@@ -2553,7 +2554,7 @@ async function start(cfg, url)
 			}
 			if (tn.nodeName != 'BODY') {
 				bcol = tn.style.backgroundColor;
-				tn.style.setProperty('filter','invert(1)', 'important');
+				tn.style.setProperty('filter','var(--g_filter_invert)', 'important');
 				footr = tn;
 				ftr_done = true;
 			}
@@ -2567,6 +2568,8 @@ async function start(cfg, url)
 			let tc = 111111;
 			let tn = n;
 			for (n of t) {
+				let gcs = getComputedStyle(n);
+				if (parseInt(gcs.height) == 0 || parseInt(gcs.width) == 0) continue;
 				let c = topNode(n);
 				if (c < tc) {
 					tc = c;
@@ -2575,7 +2578,7 @@ async function start(cfg, url)
 			}
 			if (tn.nodeName != 'BODY') {
 				bcol = tn.style.backgroundColor;
-				tn.style.setProperty('filter','invert(1)', 'important');
+				tn.style.setProperty('filter','var(--g_filter_invert)', 'important');
 				footr = tn;
 				ftr_done = true;
 			}
@@ -2590,6 +2593,8 @@ async function start(cfg, url)
 			let tc = 111111;
 			let tn = n;
 			for (n of t) {
+				let gcs = getComputedStyle(n);
+				if (parseInt(gcs.height) == 0 || parseInt(gcs.width) == 0) continue;
 				let c = topNode(n);
 				if (c < tc) {
 					tc = c;
@@ -2598,7 +2603,7 @@ async function start(cfg, url)
 			}
 			if (tn.nodeName != 'BODY') {
 				bcol = tn.style.backgroundColor;
-				tn.style.setProperty('filter','invert(1)', 'important');
+				tn.style.setProperty('filter','var(--g_filter_invert)', 'important');
 				footr = tn;
 				ftr_done = true;
 			}
@@ -2613,6 +2618,8 @@ async function start(cfg, url)
 			let tc = 111111;
 			let tn = n;
 			for (n of t) {
+				let gcs = getComputedStyle(n);
+				if (parseInt(gcs.height) == 0 || parseInt(gcs.width) == 0) continue;
 				let c = topNode(n);
 				if (c < tc) {
 					tc = c;
@@ -2621,7 +2628,7 @@ async function start(cfg, url)
 			}
 			if (tn.nodeName != 'BODY') {
 				bcol = tn.style.backgroundColor;
-				tn.style.setProperty('filter','invert(1)', 'important');
+				tn.style.setProperty('filter','var(--g_filter_invert)', 'important');
 				footr = tn;
 				ftr_done = true;
 			}
@@ -2636,6 +2643,8 @@ async function start(cfg, url)
 			let tc = 111111;
 			let tn = n;
 			for (n of t) {
+				let gcs = getComputedStyle(n);
+				if (parseInt(gcs.height) == 0 || parseInt(gcs.width) == 0) continue;
 				let c = topNode(n);
 				if (c < tc) {
 					tc = c;
@@ -2644,7 +2653,7 @@ async function start(cfg, url)
 			}
 			if (tn.nodeName != 'BODY') {
 				bcol = tn.style.backgroundColor;
-				tn.style.setProperty('filter','invert(1)', 'important');
+				tn.style.setProperty('filter','var(--g_filter_invert)', 'important');
 				footr = tn;
 				ftr_done = true;
 			}
@@ -2682,8 +2691,8 @@ async function start(cfg, url)
 
 			var htm;
 			htm = pnode;
-			if (htm.style.getPropertyValue('filter').indexOf('invert\(1') < 0)
-				htm.style.setProperty('filter','invert(1)','important');
+			if (htm.style.getPropertyValue('filter').indexOf('invert') < 0)
+				htm.style.setProperty('filter','var(--g_filter_invert)','important');
 			if (cfg.forceIInv) {
 			var hdrs;
 			if (!b_html)
@@ -2717,7 +2726,7 @@ async function start(cfg, url)
 			let sects = Array.from(img.getElementsByTagName('SECTION'));
 			let arts =  Array.from(img.getElementsByTagName('ARTICLE'));
 			if (sects.length > 2 || arts.length > 2 || img == footr) continue;
-			let p_s = parentStyle(img,/invert\(1/g,nodes_behind_inv);
+			let p_s = parentStyle(img,/invert/g,nodes_behind_inv);
 			if (p_s) {
 				img.style.setProperty('filter','unset', 'important');
 				continue;
@@ -2777,7 +2786,7 @@ async function start(cfg, url)
 			}
 			if (!nn_reg.test(isty) && !nn_reg.test(pisty) && !p_s && (!containsImage(img, images) || b_imgforce[n_c] || ((!b_chimg[n_c] && hdr != null && hdr.contains(img)) || /image/i.test(img.type) || bgim || imsrc || b_chimg[n_c])))
 				if (!(/^(UL|OL)/i.test(img.nodeName) && img.childNodes.length < 4)) {
-					img.style.setProperty('filter','invert(1)','important');
+					img.style.setProperty('filter','var(--g_filter_invert)','important');
 					let chldn = Array.from(img.getElementsByTagName('*'));
 					nodes_behind_inv.push(...chldn);
 					n_inv++;
@@ -2786,8 +2795,6 @@ async function start(cfg, url)
 			hdrs.length = 0;
 			}
 			b_html = true;
-			if (g_anegative == true)
-				css_node.nodeValue += style_rule;
 		}
 		let gcs = getComputedStyle(node);
 		if (cfg.forceOpacity && !b_opa && !cfg.start3 && cfg.skipLinks) {
@@ -2853,10 +2860,10 @@ async function start(cfg, url)
 					lastn = pn;
 					if (pn instanceof Element) {
 					let nsty = lastn.getAttribute('style');
-					if (!b_iimg[map.get(lastn)] && nsty != null && !nn_reg.test(nsty) && ((nsty+nn_style).length > 0))
+					if (!b_iimg[map.get(lastn)] && nsty != null && !nn_reg.test(nsty) && (nsty.length > 0))
 						//lastn.setAttribute('style',nsty+nn_style);
 						lastn.style.setProperty('filter','revert','important');
-					else if (!b_iimg[map.get(lastn)] && nsty == null && nn_style)
+					else if (!b_iimg[map.get(lastn)] && nsty == null)
 						lastn.style.setProperty('filter','revert','important');
 						//lastn.setAttribute('style',nn_style);
 					let cn = map.get(lastn);
@@ -2888,8 +2895,8 @@ async function start(cfg, url)
 			if (/I?FRAME\b/i.test(tag)) {
 				let fsty = node.style.getPropertyValue('filter');
 				if (fsty == null) fsty = '';
-				if (!/invert\(1/g.test(fsty) && cfg.forcePlhdr)
-					node.style.setProperty('filter','invert(1)','important');
+				if (!/invert/g.test(fsty) && cfg.forcePlhdr)
+					node.style.setProperty('filter','var(--g_filter_invert)','important');
 			}
 
 			node_count = map.get(node);
@@ -2949,7 +2956,7 @@ async function start(cfg, url)
 			if (skip_colors_nodes.includes(node)) {
 				skip_colors = true;
 				if (skip_colors_top_nodes.includes(node)) {
-					node.style.setProperty('filter','invert(1)','important');
+					node.style.setProperty('filter','var(--g_filter_invert)','important');
 					if (cfg.forceIInv) 
 					for (let im of images) {
 						if (im && node.contains(im) && im != node)
@@ -2958,7 +2965,7 @@ async function start(cfg, url)
 				} else if (!nodes_behind_inv.includes(node)) {
 					nodes_behind_inv.push(node);
 				}
-			} else if (!nimp && !ftr && (!b_iimg[node_count] || style.filter.indexOf('invert\(1') < 0) && !g_n_inv) {
+			} else if (!nimp && !ftr && (!b_iimg[node_count] || style.filter.indexOf('invert') < 0) && !g_n_inv) {
 				var cs,pcs;
 				let err = false;
 				try {
@@ -3457,7 +3464,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindFg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
+						pcol = colorblindFg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3476,7 +3483,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindBg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
+						pcol = colorblindBg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3496,7 +3503,7 @@ async function start(cfg, url)
 					ocol = col;
 					pcol = '';
 					if (b_idone[ocol] == undefined && col && cful > 34) {
-						pcol = colorblindFg(col, cfg, g_n_inv, /invert\(1/g.test(style.filter), n_inv);
+						pcol = colorblindFg(col, cfg, g_n_inv, /invert/g.test(style.filter), n_inv);
 						cola = getRGBarr(pcol);
 					} else if (b_idone[ocol] != undefined && col && cful > 34) {
 						cola = b_idone[ocol];
@@ -3718,6 +3725,8 @@ async function start(cfg, url)
 			document.body.style.setProperty('filter','unset','important');
 		if (bdy_attr && bdy_val)
 			document.body.style.setProperty(bdy_attr, bdy_val, 'important');
+		if (cfg.forcePlhdr && cfg.forceIInv)
+			document.documentElement.style.setProperty('--g_filter_invert','invert(1)');
 	}
 
 	await process(nodes);
