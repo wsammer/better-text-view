@@ -65,6 +65,7 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>Images in reverse colors do not get 'negative' effect for short time that occurred in older versions. '--g_avoid_negative' only use is the 'nowait' option (which does not wait for loading of background image of BODY element).</li>
 <li>The numeric value of '--g_load_crossorigin' is now compared with text length to skip color inversion of image if there is text beside image and the text length is more than this value. Previously, it was hard-coded to 95. Use low value (less than 10 to 30) if text next to image does not appear correct.<br>Note that correcting the text (by skipping image 'Invert colors' filter) will cause abnormal (inverted) colors of image.</li>
 <li>Setting '--g_skip_css' to 'emo' (or '1998 emo' / 'emo 1998' to enable complex CSS color variables) will disable hue correction for emojis in reverse colors, which is enabled by default.</li>
 <li>New variable '--g_site_reminder' which can be set in site's Custom CSS and gets displayed in an alert box popup on visiting site.<br>Example setting for custom CSS : <br><code>html { --g_site_reminder: 'Get items\n1 Bread\n2 Milk\n3 Eggs\n'; }</code><br>Newlines have to be entered as '\n'. Text should be within quotes ('' or "").</li>
