@@ -513,7 +513,6 @@ var g_min_colorfulness;
 var g_bg_threshold;
 var g_url;
 var g_foot_re;
-var g_anegative;
 var g_zoom_keycode;
 var g_zoom_padding;
 var g_max_child;
@@ -1096,23 +1095,6 @@ function getCSS(cfg) {
 	document.documentElement.style.setProperty('--g_zoom',n_zoo);
 
 	g_mag = ".btvenlarge:hover { position: relative; overflow: visible;-webkit-transform: scale(var(--g_zoom));-moz-transform: scale(var(--g_zoom));-o-transform: scale(var(--g_zoom));-ms-transform: scale(var(--g_zoom));transform: scale(var(--g_zoom));-webkit-transition: all .2s ease-in-out;-moz-transition: all .2s ease-in-out;-o-transition: all .2s ease-in-out;-ms-transition: all .2s ease-in-out;z-index: 19999;} .btvenlarge {position: relative; overflow: hidden;z-index: 1000; }";
-
-	g_anegative = false;
-	if (cfg.customCss && cust.indexOf('--g_avoid_negative') > -1) {
-		if (/\-\-g_avoid_negative[^\;]*false\;/.test(cust))
-			g_anegative = false;
-		else if (/\-\-g_avoid_negative[^\;]*nowait\;/i.test(cust))
-			g_anegative = -1;
-		else
-			g_anegative = true;
-	} else if (cfg.globalCss != undefined && cfg.globalCss && cfg.globalCss.indexOf('--g_avoid_negative') > -1) {
-		if (/\-\-g_avoid_negative[^\;]*false\;/.test(cfg.globalCss))
-			g_anegative = false;
-		else if (/\-\-g_avoid_negative[^\;]*nowait\;/i.test(cfg.globalCss))
-			g_anegative = -1;
-		else
-			g_anegative = true;
-	}
 
 	g_smaller_text = false;
 	if (cfg.customCss && cust.indexOf('--g_smaller_text') > -1) {
@@ -2801,10 +2783,8 @@ async function start(cfg, url)
 			b_opa = true;
 			bdy_attr = 'background';
 			bdy_val = '#fff';
-			if (g_anegative == false) await getBgImage(node, gcs, gcs.backgroundImage);
 		} else if (!b_opa) {
 			b_opa = true;
-			if (g_anegative == false) await getBgImage(node, gcs, gcs.backgroundImage);
 			if (/gradient/i.test(gcs.backgroundImage)) {
 				bdy_attr = 'background';
 				bdy_val = getGradient(gcs);
@@ -3355,7 +3335,8 @@ async function start(cfg, url)
 			if ((node.children.length == 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]) || (node.children.length > 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]+b_ctext[map.get(node.lastElementChild)]))
 				return;
 
-			if (!cfg.skipNavSection && b_chk[node_count] > 5) {
+			if (!cfg.skipNavSection && b_chk[node_count] > 5 && !node.getAttribute('_btvnavsection')) {
+				node.setAttribute('_btvnavsection',1);
 				if (tag == 'SECTION') {
 					let snw = style.getPropertyValue('width');
 					if (/\d+.*?px/.test(snw)) {
