@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<link href="assets/css/main.css" rel="stylesheet">
+		<title>Better Text View Guide</title>
+		<style>
+			@font-face {
+				font-family: Lato;
+				src: url('assets/css/fonts/LatoLatin-Bold.woff2') format('woff2');
+				font-weight: bold;
+			}
+			@font-face {
+				font-family: Lato;
+				src: url('assets/css/fonts/LatoLatin-Regular.woff2') format('woff2');
+				font-weight: normal;
+			}
+			body{
+				font-family: Lato, sans-serif;
+				font-size: 21px;
+				background-color: white;
+				color:black;
+				margin-left: 2.35em;
+				margin-right:2.35em;
+				margin-bottom:3em;
+				line-height:1.3em;
+			}
+			#grey{
+				color: rgb(160, 160, 160);
+				color: rgb(120, 124, 126);
+			}
+			#ico {
+				width: 24px;
+				height: 24px;
+			}
+			figure,figcaption {
+				text-align: center;
+				background: radial-gradient(white,goldenrod);
+				color: #000;
+				width: 100%;
+				margin-left: 0;
+			}
+			a {
+				color: #4c9;
+			}
+			li{
+				margin-bottom: 0.7em;
+			}
+			h3{
+				margin-top:2.35em;
+				margin-bottom: 0;
+			}
+			h4{
+				margin-top:1.7em;
+				margin-bottom: 0;
+			}
+			#variable{
+				font-family:Serif,serif,Times,times!important;
+				font-style:italic;
+				text-shadow:1px 1px 0 lime;
+			}
+			#code{
+				font-family:Monospace,Mono,monospace,mono !important;
+				text-shadow:1px 1px 0 red;
+			}
+		</style>
+	</head>
+	<body>
+		<h3>How to use Better Text View</h3>
+		<p>
+			<ul>
+				<li>The <img src="assets/icons/halo.png" alt="Better Text View" id = "ico"> button in the browser address bar manages the options for the current page. If it is not visible, you need to click on "Extensions" icon and "Pin" the Better Text View plugin to the toolbar.</li>
+			</ul>
+		</p>
+<h4>NEW CHANGES</h4>
+<ul>
+<li>Stupid bug! Fixed for 'Keep black text' option.</li>
+<li>Audio text through TTS now WORKS FOR NON-ENGLISH language pages after bugfix.</li>
+<li>'--g_keep_colors' works as it should, keeping background and text colors whose colorfulness is more than '--g_min_colorfulness'. However, setting brightness and contrast to non-100% will not affect the 'kept' colors and they remain unchanged.<br>If a very low '--g_min_colorfulness' value (like -1) is set, the resulting page will be almost exact replica of original site page.</li>
+<li>"Reset Settings" button added to reset all settings to default values. When page is being processed, a 'modal' (non-interactive) layer is set to prevent mouse / keyboard events modifying the styling of page.</li>
+<li>Bugfix for style changes always marked 'important' in stylesheet processing. Bugfix for style rules of images in reverse colors.</li>
+<li>Bugfix for text, that is also child element of an image, becoming 'invisible' due to Invert image filter in reverse colors. This fix depends on EVEN values of <span id="variable">'--g_load_crossorigin'</span> and the length of text less than <span id="variable">'--g_load_crossorigin'</span> value.</li>
+<li>Bugfix for VERY slow processing when 'Process :before/:after elements' is enabled. Bugfix for 'lazy' loaded images, and images set by 'content' attribute in reverse colors and Invert image colors enabled. Another bug causing 1 second delay in processing fixed.</li>
+<li>Bugfix for disabled (false or zero) values of some variables not correctly set.</li>
+<li>If <span id="variable">'--g_avoid_negative'</span> variable is not enabled, browser will process somewhat faster (or look faster, as all changes are made visible). If enabled, there will be no (or very little) image 'negative' colors (though page loading might appear slower).</li>
+<li>Bugfix for 'Disable temporarily' not working when '#full_url' is appended to URL.</li>
+<li>Tip for making even more or ALL images (and text as well) get brightness + contrast setting applied in 'Dark mode': Change the value of <span id="variable">'--g_continue_speech'</span> to a large number (like 999 or more). This value is the minimum images that need to be there for applying correction to images/text of brightness/contrast. Making it very large prevents corrections.</li>
+<li>Another value of <span id="variable">'--g_continue_speech'</span> is when it is non-zero/'false', its value is taken to check length of 'content' attribute of an element's style.<br>Some sites use 'content' attribute of element to store image address or some characters of emoji / custom fonts. Some 'content' values are placed in :before/:after classes of elements so 'Process :before/:after elements' need to be enabled, and setting <span id="variable">'--g_continue_speech'</span> to minimum length of text that 'content' must have to process it. The variable value is MODULUS 100, so it is remainder of divided by 100. Eg. setting it to 9905 means 'content' must be greater than 9905 MOD 100, which is 5.<br>Zero / false value of <span id="variable">'--g_continue_speech'</span> checks 'content' for length more than 3 letters.</li>
+<li>'High contrast dark mode' disabled in 'Dark mode' will prevent images from changing color due to brightness / contrast setting (as was case long ago).</li>
+<li>Bad bug of buttons on some sites turning 'invisible' FIXED.</li>
+<li>Fixed major bug of 'Force max opacity' that, when enabled on some sites, would make backgrounds black.</li>
+<li>Setting <span id="variable">'--g_skip_css'</span> to 'emo' (or '1998 emo' / 'emo 1998' to enable complex CSS color variables) will disable hue correction for emojis in reverse colors, which is enabled by default.</li>
+<li>New variable <span id="variable">'--g_site_reminder'</span> which can be set in site's Custom CSS and gets displayed in an alert box popup on visiting site.<br>Example setting for custom CSS : <br><span id="code"><code>html { --g_site_reminder: 'Get items\n1 Bread\n2 Milk\n3 Eggs\n'; }</code></span><br>Newlines have to be entered as '\n'. Text should be within quotes ('' or "").</li>
+<li>"Strength" slider value added to <span id="variable">'--g_bg_threshold'</span> value total are compared with text color brightness, and if total is more than text brightness, the text color is made 'high contrast' (black if total less than background brightness, or white if total more than background brightness).<br>Previously, strength was subtracted from <span id="variable">'--g_bg_threshold'</span> and compared with background brightness, causing odd values of strength and text contrast.</li>
+<li>New setting <span id="variable">'--g_load_delay'</span> which delays start of processing by milliseconds of its value.</li>
+<li>Add 'unset / currentcolor / none / revert' to colors to skip in hue correction and setting contrast.</li>
+<li>Bugs fixed. In hue correction of reverse colors, slightly complex CSS variable values for color / background / border can be processed by setting <span id="variable">'--g_skip_css'</span> to 1998. If the color variables values have only one variable and start with 'var(', they are processed even without setting the variable <span id="variable">'--g_skip_css'</span> ( to 1998 ).</li>
+<li>Reverse colors tries to preserve background colors / image within limits. Addtional settings for keeping background colors / image are :<br><span id="code"><code>html { --g_min_image_size: -1; --g_min_colorfulness: -1; }</code></span><br>or use only one of <span id="variable">'--g_min_image_size' / '--g_min_colorfulness'</span>, and<br><span id="code"><code>body { backdrop-filter: invert(1); }</code></span><br>when none of above work.</li>
+<li>Setting <span id="variable">'--g_avoid_negative'</span> to 'true' or non-zero number in custom / global CSS will avoid the 'negative' colors flash due to a wait condition in reverse colors.</li>
+<li>Reverse colors will now have short flash of "negative" colors (which can be avoided by enabling <span id="variable">'--g_avoid_negative'</span>) and become normal in end. Only some few sites will cause "negative" colors to persist after processing.</li>
+<li><span id="variable">'--g_min_image_size'</span> also preserves background images of BODY tag if size (width * height) is greater than 100 times this value.</li>
+<li><span id="variable">'--g_smaller_text'</span> now does <b>normal scaling</b> of font sizes, instead of <b>inverse increase.</b> Text sizes will appear similar to original text. The amount of smallness of text sizes is adjustable by "Increase font %".</li>
+<li>Style sheet processing for colors is skipped if 'Dark mode' is set. Bugfix for images with 'PICTURE' tag not displayed in reverse colors on some sites. Stop the mutation observer when applying settings. Mark as done the parent nodes of new mutation nodes.</li>
+<li>If content is 'appended' to page after it loads, the page settings will now also apply to the new content.</li>
+<li>Bugfix for background color not updating when brightness / contrast is changed in dark mode / reverse colors.</li>
+<li>In 'Start 3 letters bold', the variable <span id="variable">'--g_start3_caps'</span> can now be set to line / paragraph mode, in which starting LETTER of line / paragraph is changed to different style which is specified in the variable value.</li>
+<li>Added Pause / Resume function of speak out loud by zooming text. The Escape key pauses the reading, and pressing Escape again resumes the speech from where it was stopped.</li>
+<li>Enabling 'Process black text' now changes originally black text to white color if background color brightness is less than <span id="variable">'--g_min_bg_brightness'</span>.</li>
+<li>New variable <span id="variable">'--g_skip_css_colors'</span> which skips hue correction (and contrast) of elements processed in stylesheets.<br>Setting <span id="variable">'--g_skip_css_colors'</span> to greater than 10 skips more elements than less than 10, and if greater than 99, skips text contrast.<br>Default value is disabled.</li>
+<li>The <span id="variable">'--g_svg_bg_white'</span> now also works for PNG images. Set this to enabled / 'dontinvert' if icons do not appear correct in reverse colors.</li>
+<li>Bugfix for speak out loud text-to-speech, which would stop speech after few sentences. Now it might stop in long sentences, but less often.</li>
+<li>Simplified contrast calculation. If text color brightness is more than background color brightness, text is made white, otherwise black.<br>SOME SITE SETTINGS will need adjusting. As the calculation relies on background color being correct (text color is generally always correct), most adjustment will be setting background color, through custom CSS, of elements having mismatch in color of background displayed vs. background calculated in CSS.</li>
+<li>For SVG images in reverse colors, setting <span id="variable">'--g_svg_bg_white'</span> to 'dontinvert' will not apply invert filter to the images. If icons are not appearing correctly in reverse colors, try setting <span id="variable">'--g_svg_bg_white'</span> to 'dontinvert'.</li>
+<li>The <span id="variable">'--g_skip_css'</span> now processes only pseudo elements/classes (:before/:after/:selection/:hover) part of stylesheet. To skip ALL processing of stylesheets, either set <span id="variable">'--g_max_css_rules'</span> to 0 (zero) or <span id="variable">'--g_skip_css'</span> to 99 (which skips pseudo class/elements AND rest of stylesheet).</li>
+<li>New variable <span id="variable">'--g_smaller_text'</span> which makes text size smaller instead of making it larger.</li>
+<li>New variable <span id="variable">'--g_min_image_size'</span> for images which are smaller than this size are skipped applying the 'Force Invert Image' filter in reverse colors. This also preserves background images of BODY tag if size (width * height) is greater than 100 * this value. Default value is 199.</li>
+<li>New variable <span id="variable">'--g_change_vars'</span> if enabled, changes the variable value of colors instead of color property. Enable on some sites which may require this to have correct hue correction.</li>
+<li><span id="variable">'--g_keep_colors'</span> now works with text background / border colors and :hover/:selection/:before/:after classes of text. Support for loading of cross-origin stylesheets which depends on variable <span id="variable">'--g_load_crossorigin'</span>.</li>
+<li>"Process :before/:after elements" now does ::hover/::selection/:before/:after colors for hue correction in reverse colors. Use with <span id="variable">'--g_load_crossorigin'</span> and <span id="variable">'--g_max_css_rules'</span> to load all stylesheet rules. Default value of <span id="variable">'--g_max_css_rules'</span> changed from 1000 to 100.</li>
+<li>"Start 3 bold" option now has variable <span id="variable">'--g_start3_caps'</span> which, when enabled, makes start 3 letters CAPITAL and bold.</li>
+<li>Added support for named colors when processing stylesheets.</li>
+<li>Text is now READ OUT LOUD by speakers through Text-To-Speech engine when a page element having text is zoomed. The language of speaking is set by webpage language.</li> 
+<li>"Avoid colored text" option works correctly with reverse colors. The amount of colorfulness is specified by <span id="variable">'--g_min_colorfulness'</span> below which text can be made high contrast. A value of 256 / 300 will make all text high contrast, depending on strength slider.</li>
+<li>Copy/Paste icons on popup menu to copy settings of one site and paste the settings to another site.</li>
+<li>New option 'Process gradient colors' to enable / disable processing of background gradient colors in hue correction. Default value is false (disabled).</li>
+<li>Background color gradients are shown as original in reverse colors with hue correction.</li>
+<li>Bugfix for "g_skip_colors" causing images within skipped class / id / tag to become inverse colored instead of normal.</li>
+<li>New option 'Process black text', which is false by default, that allows processing black text when enabled or skip black colored text if disabled.</li>
+<li>Keep text color same as original colorful background / text / border in reverse colors hue correction, which is enabled by setting --g_keep_colors to true or 1 (one).</li>
+<li>New variable <span id="variable">'--g_svg_bg_white'</span> which set to true, will make background of SVG images white in reverse colors.</li>
+<li>Child elements of shadow root are processed similar to HTML elements.</li>
+<li>Bugfix for skipping some tags which should not have been skipped, causing text size change to not work.</li>
+<li>Variables to allow skipping classes/tags/ids of elements from being reverse colored.</li>
+<li>Multiple color variables separated by comma in stylesheets are now processed correctly. A new variable "g_max_css_rules" sets the maximum CSS rules count. If style sheet exceeds that, it is not processed.</li>
+<li>Background color is preserved in reverse colors if the colorfulness is more than <span id="variable">'--g_min_colorfulness'</span> value (default: 41)</li>
+<li>Variable to skip black text color, which was always true previously, can be set to false.</li>
+<li>Adding "#full_url" to URL in Address box will store the settings with the full URL of the page so settings of special pages can be stored uniquely by adding "#full_url" to the Address box URL.</li>
+<li>Add variable to skip CSS rules processing and set zoom padding.</li>
+<li>Colors of borders left, top, bottom and right ane also hue corrected, and new variables for adjusting reverse color hue correction.</li>
+<li>Variable <span id="variable">'--g_max_child'</span> which sets maximum child elements a node should have to set its line height.</li>
+<li>Changes to line height which applies to some paragraph elements, so that paragraphs lines do not appear very different due to 2 different line heights applied.</li>
+<li>The variable <span id="variable">'--g_foot_re'</span> if enabled in either custom CSS or global CSS rules will make footer areas of website colors as normal in reverse colors.</li>
+<li>Zoom value (and the keycode assigned to it) can be given in custom CSS rules. as following : <br><span id="code"><code>html { --g_zoom: 5.0; --g_zoom_keycode: 17; }</code></span><br> which sets the zoom value of 500% (not possible by Strength slider) and the 'Control' keycode (17) to press (along with Numlock enabled).</li>
+<li>Setting Strength to -300 (minus 300) skips doing high contrast text changes totally, resulting in faster processing.</li>
+<li>New "high contrast dark mode" enabled text contrast method determines color brightnes of text and makes non-high contrast text black / white depending on Strength slider value. Increasing Slider towards 300 makes most text black (or white for reverse colors). Decreasing slider towards zero makes most text white (or black). If text contrast is not working as expected, try enabling / disabling this option to chamge between old / new method of text contrast.</li>
+<li>Input text elements with text will be increased in width (and height) proportional to text length or Increase font %. This effect can be disabled by enabling "Input border" and the "start 3" disabled and "skip links" enabled combination.</li>
+<li>New option in Reverse colors for processing Before / After pseudo elements' background images which are then correctly displayed.</li>
+<li>Setting (enable "Skip links" and disable "Start 3 letters") makes the Font Weight slider proportional to inverse text size calculations. 400 weight is default "inverted text size change" whose amount decreases at font weight of 300 .. 100 .. 900 .. 500 with 500 being "normal" website text with no "inverse text size change". If a site has VERY bad layout due to inverted text sizing, decrease the font weight to 100 / 900 .. 500 which will keep original font size settings. The setting is enabled by making "skip links in start 3" enabled and "start 3 letters bold"disable.</li>
+<li>New "Font name" setting makes all text of font type as specified in setting. For example, enter 'Sans-Serif' / 'Serif' / 'monospace' (no quotes) in "Font name" text box and refresh page to get all text of that font type (or name).</li>
+<li>New option to Disable Better Text View on a site temporarily while keeping settings instead of deleting them (which Blacklist does).</li>
+<li>Pressing Shift key down and moving mouse over any area of page will "ZOOM" the text / image in that area.</li>
+<li>"Force max opacity" now changes background color of BODY element to black only if Skip Links is enabled and Start 3 disabled. Making text fully opaque does not depend on any other options.</li>
+<li>31 Presets can be defined with custom settings of sliders and options. These presets can be loaded to quickly change the settings to particular configuration for a site.</li>
+<li>Strength slider controls the "text vs background contrast" with text color changed to black / white. Negative strength preserves original colors of site and high positive value create greater contrast. There are 2 calculation methods for contrast, the older method when "High contrast dark mode" is disabled and new method when it is enabled. Depending on website, either will work though new option is slightly faster.</li>
+<li>"Colorblind adjusted colors" which changes colors of text to suit colorblind condition. In dark mode or reverse colors, the text hue is changed toward green color while in normal light theme, the text is changed for blue color.</li>
+<li>If strength is an ODD number, input textbox color is changed to black/white depending on its color.</li>
+<li>Color shades of text (and backgrounds somewhat) can be made similar to original website by enabling "Reverse colors hue correction".</li>
+<li>Enabling "Skip text height changes" (or "Input border" along with "start 3" disabled and "skip links" enabled) avoids changing font heights of text and INPUT elements like text boxes and select boxes.</li>
+<li>If either of "Dark mode" or "Reverse Colors" is enabled in global options, all websites colors are changed to "dark theme" colors. If the theme calculates "Lightness" wrong, then enable both "Reverse colors" and "Dark mode" to override the wrongly computed theme.</li>
+<li>"Reverse Colors" & "Invert Image colors" correctly displays most emojis, but speed is slow.</li>
+<li><b>IMPORTANT</b>: When the settings of "Increase font %" and "Font Threshold" are VERY HIGH, to make text appear MUCH BIGGER, the browser's "Text Size" Setting SHOULD ALSO BE CHANGED TO "LARGE/VERY LARGE" or "18 px to 24 px". Otherwise on some pages OVERLAPPING/CUTTING of text MAY occur.</li>
+<li><b>Avoid enabling both "Dark Mode" and "Force Reverse Colors",</b> except to override the calculated lightness of page, if its not matching actual page theme. This condition is not considered and some odd results will occur.</li>
+</ul>
+<p>
+<h4>ABOUT EXTENSION</h4>
+<b>TL;DR</b><br>
+<ul>
+<li>This extension enlarges text and makes it higher contrast, so that website text is easier to read.</li>
+<li>Font size within threshold is enlarged inversely with font size. That means small text made bigger than large text. See image below
+<figure><figcaption>Text size inverse increase with font size (left side) and normal text (right side). Font Threshold is 17px.</figcaption>
+<img class="img_help" src="assets/icons/font-inverse-size.png" title="Inverse size increase" style="width:50%;" ></figure>
+</li>
+<li>Text contrast can be increased by the 'Strength' slider, with high positive values making text more black / white and negative values keeping text color unchanged.<br>The strength slider also determines the Zoom %, with default zero strength giving 175% (1.75) zoom value.</li>
+<li>Font Weight slider changes thin/bold-ness of ALL text, and bold and normal letters weight when "Start 3 letters bold" is enabled.</li>
+<li>Dark mode changes Contrast and Brightness of "black" themed sites. Pictures are kept normal but if "High contrast dark mode" is enabled, the brightness / contrast effect is greater and images get distorted colors. See image below
+<figure><figcaption>Dark mode with High contrast option enabled and brightness / contrast at non-default values.</figcaption>
+<img class="img_help" id="high-contrast" src="assets/icons/high-contrast-dark-mode.png" style="width:50%;" title="High contrast option in Dark mode" ></figure>
+</li>
+<li>In Dark mode and Reverse colors the text (and some background) brightness and contrast can be changed by their sliders.</li>
+<li>The "Force Reverse Colors" option is useful for changing colors of sites to "Dark Theme" or "Dark Reader" view while preserving (most of) images' colors and background and text colors. Image colors are made normal by enabling "Invert image colors" and text / background colors similar to original by enabling "Reverse Colors hue correction". See image below
+<figure><figcaption>Reverse colors of white background light theme page with ALL CAPS & start 3 letters bold enabled.</figcaption>
+<img class="img_help" id="reverse-colors" src="assets/icons/reverse-colors.png" style="width:50%;" title="Reverse Colors with ALL CAPS and start 3 bold on wikipedia page" ></figure>
+</li>
+<li>ALL CAPITAL TEXT option makes all webpage text in capitals and also works on NON-ENGLISH languages.<a href="#reverse-colors">See above image.</a></li>
+<li>Starting 3 letters bold option makes all words first 3 letters <b>bold</b> for most languages. If there are problems with some links or menus not working, enable "Skip links in 3 letters bold" option to avoid making links bold. <a href="#reverse-colors" >See above image</a></li>
+<li>The popup settings page (next to icon in bottom-left corner) show the "Lightness" value of current site. If less than 0.5, then its "Dark themed", if more than 0.5, it is "Light themed". (For some sites this value can be wrong.) Dark themed sites can be adjusted for brightness and color by "Dark mode" while "Light themed" sites can be reverse-colored  by "Reverse Colors" to make them dark themed.</li>
+<li>'Colorblind adjust colors' when enabled changes text colors and background to suit general colorblind condition. See image below
+<figure><figcaption>Colorblind adjust option (right) changes colors towards a blue shade in light theme, green in dark theme.</figcaption>
+<img class="img_help" id="colorblind-adjust" src="assets/icons/colorblind-adjust12.png" style="width:50%;" title="Colorblind adjusting of colors (lower part) of different colors of text" ></figure>
+</li>
+<li>Zoom value and keycode of key to press can be given in custom CSS rules. as following : <br><span id="code"><code>html { --g_zoom: 5.0; --g_zoom_keycode: 17; }</code></span><br> which sets the zoom value of 500% (not possible by Strength slider) and the 'Control' keycode (17) to press (along with Numlock enabled).</li>
+<li>Text of a page when zoomed, is spoken loud by Text-To-Speech synthesizer of browser. The speech can be paused by pressing Escape key, and resumed by again pressing Escape.</li>
+<li>Enabling "Apply custom CSS for site" will allow you to enter custom CSS rules for the site</li>
+</ul>
+<h4>DETAILS</h4>
+<ul>
+<li>The text size is increased inversely depending on its size. This means small sized text is made much bigger than larger text, which is slightly increased in size. All text within size of Threshold setting is increased in size with text closer to Font Threshold size increasing less than text much lower size than Threshold, depending of Increase Font % setting. Text size of ANY TEXT IS NOT DECREASED to less than its normal size. Smaller text becomes as large as (or larger than) text of Threshold size. Text near the Threshold size is unchanged or changed very slightly.</li>
+<li>If "Activate on all websites" option is disabled only "whitelisted" sites are changed, else ALL sites get processed.</li>
+<li>Text contrast is increased by making grey text color black on pale background, and text color white on dark background.<br>By changing the 'Strength' slider, the contrast in text is changed, with negative values applying less contrast (-300 is no contrast, all text color is UNCHANGED) and positive values higher contrast.</li>
+<li>Disabling the 'Avoid colorful text' option makes colored text high contrast. The 'colorfulness' of text is calculated and is between range of 0 to 255.<br>The variable <span id="variable">'--g_min_colorfulness'</span> (default value: 41) is compared with text color to determine if text is to be made high contrast.</li>
+<li>Frames inside of site are also processed, but their settings are of the origin site of the frame, which MAY NOT be the site displayed in address box. <b>FOR SITE WITH FRAMES, the settings of the page WITHIN FRAME needs to be changed also, not just the main toplevel address page. If a page's settings are NOT WORKING, it might be that page HAS FRAMES for which the individual sites / hosts' settings need to be done.</b></li>
+<li>Brightness and Contrast Slider controls the brightness / contrast of text/background with -200% to 400% and -100% to 300%.</li>
+<li>The colors of text are changed for maximum contrast depending on value of "Strength" slider (unless "Avoid colorful text" is selected which skips "colorful" text,  and if "Skip white text" option is enabled, which skips WHITE text). If greater than 200, text colors change for maximum contrast.</li>
+<li>By increasing "Strength" setting to above 200, the text can be made black on light background or white on black background (if dark mode is enabled) depending on brightness of background color ("Avoid colorful text" and "Skip white text" is ignored). If some text is still not high contrast, increase strength to maximum 300, enable "Force max opacity" and disable "Avoid colorful text". If this does not give high contrast text, change "High contrast dark mode" option.</li>
+<li>Decreasing "Strength" setting to negative values like -120 or -250 can restore the original text colors of website instead of high contrast black / white text. A strength of -300 (negative 300) skips all high contrast changes and original colors are kept, and page processed faster.</li>
+<li>If Strength is ODD value, and there are INPUT text boxes on site, the input text will be made black / white depending on color.</li>
+<li>The "Font Weight" slider can be changed to lowest 100 (very thin) upto 900 (very thick/bold) text. This is useful for adjusting sites having very thin text or very bold and thick text. When "Start 3 letters bold" is enabled, (slider value + 400) is taken as weight of bold letters and noramal text has weight of (slider value) if slider is less than 500. For slider above 400, the slider value is taken as weight of 3 letters and all other text is normal.</li>
+<li>"Font name" option allows changing font of all text of page with the font entered in textbox. After putting font name in textbox, press Enter and the font will change immediately without requiring refresh of page.</li>
+<li>Pressing Shift key down and moving mouse over any area of page will "ZOOM" the text / image in that area  by 175% (or by Strength % if slider is not zero) when "Num Lock" key is on. The zoom value (<span id="variable">'--g_zoom'</span> default value is 1.75 or 175%) and keycode (<span id="variable">'--g_zoom_keycode'</span> default value is 16 = Shift) can be changed by Custom / global CSS rules.</li>
+<li>Text of a page when zoomed, is spoken loud by Text-To-Speech synthesizer of browser. The spoken language is set by language of webpage. When zoom key is released / un-pressed, the audio stops. To continue speech audio even after releasing zoom key, set the new variable <span id="variable">'--g_continue_speech'</span> to true / 1.<br>The language of speaking can also be set by value of new variable <span id="variable">'--g_speech_language'</span> in custom / global CSS. For American English, the speech language is 'en-US'. To disable the reading text when zooming, set the g_speech_language variable to false/0.<br>Pressing Escape when speaking pauses the speech, and pressing Escape again resumes speech.</li>
+<li>ALL CAPITAL TEXT option makes all webpage text in capitals. It ALSO works on NON-ENGLISH languages.</li>
+<li>Starting 3 letters bold option makes all words first 3 letters <b>bold</b> and also works for NON-ENGLISH languages. If there are problems with some links or menus not working, enable "Skip links in 3 letters bold" option to avoid making links bold.<br>If the variable <span id="variable">'--g_start3_caps'</span> is enabled, start 3 letters are made CAPITAL and bold.<br>The <span id="variable">'--g_start3_caps'</span> variable can also be set to <span id="code"><b>'line; font-size:+1.2em; font-family:Serif;'</b></span> (quotes included)to make starting letter of every LINE bigger (+1.2em) and different font (font-family:Serif). Other option is to set to <span id="code"><b>'para; font-size:+1.5em; font-family:Trajan Pro; font-weight:bold;'</b></span> (including quotes) which sets starting letter of every PARAGRAPH to different style (font size: +1.5em, font name: Trajan Pro, font weight: bold).<br>Colors/other properties can also be added to the style in <span id="variable">'--g_start3_caps'</span>. Quotes are required, and can be single(') or double(") quotes, but not backquote(`).<br>One of issues in start letter mode is that numbers with decimal point, website addresses with dots or other words containing fullstop also change, while in line mode, some sentences may not get capital first letter.</li>
+<li>The "Dark Mode" option is for black themes and, when enabled, allows increasing of Brightness (by the "Brightness" slider, range 0 to 300) and Contrast (by the "Contrast" slider, range 0 to 300) of text and background colors.</li>
+<li>Tip for making even more or ALL images (and text as well) get brightness + contrast setting applied in 'Dark mode': Change the value of <span id="variable">'--g_continue_speech'</span> to a large number (like 999 or more). This value is the minimum images that need to be there for applying correction to images/text of brightness/contrast. Making it very large prevents corrections.</li>
+<li>Another value of <span id="variable">'--g_continue_speech'</span> is when it is non-zero/'false', its value is taken to check length of 'content' attribute of an element's style. Some sites use 'content' attribute of element to store image address or some characters of emoji / custom fonts. Some 'content' values are placed in :before/:after classes of elements so 'Process :before/:after elements' need to be enabled, and setting <span id="variable">'--g_continue_speech'</span> to minimum length of text that 'content' must have to process it. The variable value is MODULUS 100, so it is remainder of divided by 100. Eg. setting it to 9905 means 'content' must be greater than 9905 MOD 100, which is 5.<br>Zero / false value of <span id="variable">'--g_continue_speech'</span> checks 'content' for length more than 3 letters.</li>
+<li>A "Force Reverse Colors" option allows site to "Reverse" colors, so that a light site becomes black. It is useful for changing colors of sites to "Dark Theme" or "Dark Reader" view while preserving (most of) images' colors. In case a webpage does not have its background color darkened, enabling "Force max opacity" will force make the BODY background color black if "Start 3 disable / Skip links enable" is set. This may not work if background color is set by non-BODY element.</li>
+<li>The "Invert Image Colors" option, which appears when "Force Reverse Colors" is enabled, causes images and videos colors to be inverted, so due to double inversion images and videos become normal. If it is disabled, the images and videos are not doubly inverted in color, causing them to look "reverse color".</li>
+<li>Reverse color hue correction changes colors to match original website in reverse colors. However, if brightness and colorfulness are in certain variable limits, the original colors are kept. The variables affecting the hue correction are described in list below.</li>
+<li>Option "Process :before/:after elements" adjusts :before/:after/:hover/:selection colors in reverse colors hue correction. The <span id="variable">'--g_load_crossorigin'</span> may need to be enabled and <span id="variable">'--g_max_css_rules'</span> changed to much more than 100 (default) to load all stylesheets rules. Some colors may not get corrected.<br>Any background images in reverse colors are then correctly displayed if "Invert image colors" is also enabled.<br>In normal mode (not dark or reverse colors), a font size setting in :before/:after is changed by enabling this option.<br>Changing <span id="variable">'--g_max_css_rules'</span> to a low value / 0 (zero) speeds processing by a fraction.</li>
+<li>The <span id="variable">'--g_load_crossorigin'</span> value is used in hue correction if an image has a child text element(s). If total length of child texts is less than <span id="variable">'--g_load_crossorigin'</span> value, the invert filter is applied to child texts, only if its value is EVEN number. For odd values of <span id="variable">'--g_load_crossorigin'</span>, this processing of child texts is skipped.</li>
+<li>The text brightness and contrast can be changed by the sliders when "Reverse colors" is enabled. To revert to original brightness and contrast, set Brightness and Contrast to 100.</li>
+<li>Before a preset is made, select the preset number at the very start. Then make the customizations and finally click "Save" to save to a number between 1 to 31. This saved preset can be loaded by clicking "Load" after selecting the number of preset. Clicking "Refresh" button after all steps is recommended of knowing preset has been saved / loaded. Presets are stored in the "whitelist" list so exporting whitelist to a file will also save presets. <b>Settings with a selected preset do not get automatically updated if a preset is changed. One has to "Load" the preset again.</b></li>
+<li>The popup options box show the "Lightness" value of current site. If less than 0.5, then it is considered "Dark themed", if more than 0.5, it is "Light themed". Dark themed site colors can be changed by "Dark mode" while "Light themed" site colors can be changed through "Reverse Colors". Some few sites may detect theme wrong, then enable BOTH Dark mode and Reverse colors to force site color changes.</li>
+<li>If "High contrast Dark mode" is enabled in Dark mode, then brightness and contrast are applied to more elements and images (which can distort colors of some images). Newer method of calculating black / white / high contrast text color is used.</li>
+<li>The menu and large sections of webpage are increased in size according to the Increase Font % and Input elements increased by Font Threshold. If there are problems in display of menus / header imaages or large tables overlap, enable "Skip NAV & SECTION" checkbox. The "Skip NAV & SECTION" also skips applying Reverse Color to images inside NAV and HEADER elements, which are (usually) on top menu of webpage, when "Force Reverse colors" is enabled.</li>
+<li>"Skip text height changes" will not change heights of text, and INPUT elements like text and select boxes.</li>
+<li>'Colorblind adjust colors' when enabled changes text colors and background to suit colorblind condition. In dark mode or reverse colors, the text hue is changed toward green color while in normal light theme, the text is changed for blue color.</li>
+<li>Enabling "Apply custom CSS for site" will allow you to enter custom CSS rules for the site</li>
+<li>The "Disable Better Text View on this site temporarily (keep settings)" option keeps settings saved while blacklisting (making no changes) the site. If the settings on a site need to be temporarily disabled, use this option insted of "Disable Better Text View on this site".</li>
+<li>The "inverse text size" increase can be reduced to "normal size" by changing font weight after the setting "skip links" enabled and "start 3 bold" disabled.</li>
+<li>Global CSS Rules are applied to all sites before Custom CSS rules of a site. Change to some particular rules that need to apply every site.</li>
+<li>Adding "#full_url" to URL in Address box will store the settings with the full URL of the page as hostname. The settings for specific pages can be changed by adding "#full_url" to the end of URL in Address box. The settings of the site are not affected by these changes. May not work on some sites where URL is controlled.</li>
+<li>Using global CSS rules or site's Custom CSS rules, the following "internal" values can be changed to modify text contrast method constants.
+<ul>
+<li><b><span id="variable">--g_min_colorfulness</span> : </b>Minimum colorfulness value to compare when "Avoid colorful text" is enabled.<br>Decreasing this will keep most text with color unchanged. Increasing this will make slightly colored text into high contrast.<br>Its value is also used for hue correction of background color (along with g_min_bg_brightness).<br> Default is 41.</li>
+<li><b><span id="variable">--g_bg_threshold</span> : </b>Background brightness threshold constant is calculated with this subtracted by Strength slider value to compare with background brightness in normal (not reverse colors) mode. Also used in "Keep original text colors" ( <span id="variable">'--g_keep_colors'</span> is 1 or true). If length of text is less than g_bg_threshold, and background brightness is more than g_min_bg_brightness, then original colors are set in reverse colors hue correction. <br>Default value is 160.</li>
+<li><b><span id="variable">--g_zoom</span> : </b>Sets the value of zoom when zooming. 1.75 is default for 175% (do not specify percent, value of 1 is 'no zoom', less than one is 'zoom out', and greater than one is 'zoom in'.<br>Default value is 1.75</li>
+<li><b><span id="variable">--g_zoom_keycode</span> : </b>Sets the keycode of key to press for zooming (and Numlock has to be on).<br>Default value is 16 (Shift).</li>
+<li><b><span id="variable">--g_avoid_negative</span> : </b>If enabled in global / custom CSS and Reverse colors & Invert Image colors are enabled, avoids images and text appearing 'negative' briefly when page is loading images.<br>Default is false (NOT zero).</li>
+<li><b><span id="variable">--g_foot_re</span> : </b>Setting this to greater than zero in custom CSS or global CSS rules makes footer areas of website normal colors in reverse colors mode. Custom CSS has priority over global CSS, so value of g_foot_re in custom CSS overrides global CSS value. <br>Example : <br><span id="code"><code>html { --g_foot_re: 11; }</code></span><br>xyz does not have to be some specific tag or class or id, any text will work so long as <span id="variable">'--g_foot_re'</span> value is specified.<br>Default is not set.</li>
+<li><b><span id="variable">--g_max_child</span> : </b>This sets the maximum child elements a node should have to set its line height to a constant 115%.<br>Default value is 8.</li>
+<li><b><span id="variable">--g_max_fg_brightness</span> : </b> The maximum brightness of text color beyond which the original color is kept instead of 'hue corrected' color. Set to 256 / 300 for only hue-corrected colors or values in range 100 to 200 for preserving text colors. <br>Default value is 254.</li>
+<li><b><span id="variable">--g_min_bg_brightness</span> : </b> Minimum brightness of background color below which background colors are kept as original. Setting to 0 / -1 to make all backgrounds hue corrected, or set to 256 / 300 along with g_min_colorfulness at 0 or -1 to keep mostly all background original colors. <br>Default value is twice value of min_colorfulness if any custom CSS / global CSS rules are set or 82.</li>
+<li><b><span id="variable">--g_max_border</span> : </b> The maximum colorfulness of border elements to process for hue-correction in reverse colors. Setting to 0 / -1 will skip hue-correction and keep borders colors as original while setting to 300 (or more than 255) will process all border colors as hue correction.<br>Default value is 21.</li>
+<li><b><span id="variable">--g_skip_css</span> : </b> Skips the processing of CSS stylesheets rules for reverse colors hue correction. Enable if hue correction of reverse colors is not required.<br>Default value is false (0).</li>
+<li><b><span id="variable">--g_keep_colors</span> : </b> Keep original colors in hue correction of reverse colors. <br>Default value is false (0).</li>
+<li><b><span id="variable">--g_zoom_padding</span> : </b> Sets the padding of top left bottom right areas of zoom.<br>Default value is 0% 15% 0% 15% for left and right 15% padding (works well on slashdot.org).</li>
+<li><b><span id="variable">--g_max_css_rules</span> : </b> The maximum number of CSS rules allowed in a stylesheet beyond which its processing is skipped.<br>Default value is 100.</li>
+<li><b><span id="variable">--g_start3_caps</span> : </b> If enabled, makes "start 3 bold" option have CAPITAL text along with bold style.<br>Default value is false.</li>
+<li><b><span id="variable">--g_load_crossorigin</span> : </b> If a cross-origin stylesheet's rules are not accessible, enabling this variable will load the contents of stylesheet from its URL.<br>Default value is false.</li>
+<li><b><span id="variable">--g_speech_language</span> : </b> The language of Text-To-Speech output. If not specified, it is the language specified in webpage.<br>Default value is webpage's language.</li>
+<li><b><span id="variable">--g_continue_speech</span> : </b> If set to true (or not false), Text-To-Speech continues reading even after zoom key is un-pressed.<br>If disabled, TTS stops speaking after releasing zoom key.<br>Default value is false.</li>
+<li><b><span id="variable">--g_skip_colors_classes</span> : </b> The classes separated by comma, of elements which are to skip reverse colors.<br>Default value is absent.</li>
+<li><b><span id="variable">--g_skip_colors_tags</span> : </b> The tags separated by comma, of elements which are to skip reverse colors.<br>Default value is absent.</li>
+<li><b><span id="variable">--g_skip_colors_ids</span> : </b> The ids separated by comma, of elements which don't get reverse colored.<br>Default value is absent.</li>
+<li><b><span id="variable">--g_svg_bg_white</span> : </b> The background color of SVG images (which generally have transparent background) is made white in reverse colors mode.<br>Set this to 'dontinvert' in reverse colors to prevent darkening of monochrome icons.<br>Default value is false.</li>
+<li><b><span id="variable">--g_change_vars</span> : </b> The variables having color values are changed in hue correction if enabled. May be needed on some websites.<br>Default value is false.</li>
+<li><b><span id="variable">--g_min_image_size</span> : </b> Images smaller than this minimum image size (in pixels square) are not inverted in reverse colors with 'Force Invert Image' enabled. Also if size (area) is greater than 100 times this value, background images of BODY tag preserve their colors. Setting this to a low value (1 to 50) will preserve most background images. If a background color for BODY is also set, setting the <span id="variable">'--g_min_colorfulness'</span> to a low (even negative) value will preserve image and colors. If the background color only requires to be set and not background image, try setting g_min_image_size to a very high (9999 or higher) value so that only colors are processed and not background image.<br>Default value is 199.</li>
+<li><b><span id="variable">--g_smaller_text</span> : </b> Opposite of 'inverse text increase'. Text size is decreased instead of increase. Amount of decrease is adjusted by "Increase font %".<br>Default value is false (NOT zero).</li>
+<li><b><span id="variable">--g_skip_css_colors</span> : </b> Enabling this skips hue correction (and contrast) of elements processed in stylesheets.<br>Setting it to greater than 10 skips more elements, and if greater than 99, skips text contrast.<br>Default value is disabled.</li>
+<li><b><span id="variable">--g_load_delay</span> : </b> Setting this greater than zero (0) delays start of processing by milliseconds of its value.<br>Default value is 0 (disabled).</li>
+<li><b><span id="variable">--g_site_reminder</span> : </b> This can be set in site's Custom CSS textbox and its string value gets displayed in an alert box popup on EVERY visit to site.<br>The string value should be within quotes, single ('') or double (""). Newlines should be input as '\n'.<br>Default value is empty string (disabled).</li>
+<li><b><span id="variable">--g_final_lightness</span> : </b> This can be set to values between 0 and 1, with value more than 0.5 indicates a light theme, less than 0.5 a dark theme. If the site has wrong theme detected, setting this variable forces the theme lightness / darkness.<br>Default value is calculated from page body and html colors.</li>
+<li>Most of above variables have range between 0 to 255, but can have values outside of range. These variables allow for more 'switches', which would otherwise take up a lot of space on Settings page. They provide more customizations through a non GUI-based way.</li>
+<li>The values can be changed by applying Custom CSS for a site or setting in global CSS rules. Example CSS rule is <br><span id="code"><code>html { --g_min_bg_brightness: 99; }</code></span><br>which sets the <span id="variable">'--g_min_bg_brightness'</span> to 99 or<br><span id="code"><code>A { color: #0c0; }</code></span><br>which changes link color to green.<br></li>
+</ul>
+</li>
+<li>Additional features are input box borders, underlining of links and saving/loading of settings whitelists/blacklists,</li>
+<li>This extension makes website text easier to read by enlarging text and increasing contrast of text color.</li>
+<li>It also helps people who require reading glasses / spectacles due to far-sight / long-sight (presbyopia / hypermetropia / hyperopia) condition of eyes.</li>
+<li><b>VERY IMPORTANT WARNING</b>: If you are COPY+PASTE-ing from a page which has been changed by this plugin, DISABLE the plugin for that webpage and THEN copy + paste. If you are editing or submitting HTML content online using a content management system like Wordpress or having an HTML Editor, DISABLE this extension for that particular site. Otherwise, the HTML will contain unwanted styling elements generated by the extension.</li>
+<li>WHEM PRINTING A WEBPAGE modified by this extension, KEEP "Disable for this site (keep settings)" enabled otherwise the PRINTING WON'T BE CORRECT.</li>
+<li><em>Some options which increase processing speed of font & color changes and enabling / disabling any of - "Skip text height change" / "Skip NAV SECTION" / "Avoid colorful text" / "Reverse colors hue correction" / "Process :before/:after elements" / Strength slider to -300 / <span id="variable">'--g_skip_css'</span> / <span id="variable">'--g_max_css_rules'</span> / <span id="variable">'--g_max_child'</span> - options and variables can reduce procesing time.</em></li>
+</ul>
+		<h3>Options guide</h3>
+
+		<p>Clicking on the options button will open this window:</p>
+		<img src="assets/icons/options.png">
+		<ul>
+		<li><strong>Disable on this website:</strong> Adds the website to the blacklist.<strong>The contents of this site will not be changed.</strong><br>Default value: disabled</li>
+		<li><strong>Disable temporarily (keep settings):</strong> Adds the website to the blacklist but does not delete settings of site (which can be got back by disabling this).<strong>The contents of this site will not be changed but neither will customized settings be deleted.</strong><br>Default value: disabled</li>
+		<li><strong>Strength:</strong> Adjusts the application of black/white color. This value can be adjusted to preserve website's original colors or to make it higher contrast. In Dark mode or Reverse colors, this deteermines "brightness" of text / background. If it is an ODD number, INPUT text boxes color is changed to black/white for maximum contrast.<br>Default value: 0</li>
+		<li><strong>Increase font (%) / Threshold (px):</strong> Enlarges fonts that are below the threshold (in pixels).<br>Default value: 14% / 18 px.</li>
+		<li><strong>Font Weight:</strong> Changes bold setting of fonts from 100 (thinnest) to 900 (boldest) 400 is normal.<br>Default value: 400</li>
+		<li><strong>Contrast %:</strong> Determines the contrast percentage of text in Dark mode and Reverse Colors.<br> e.g. 50 equals normal contrast in Dark mode and Reverse Colors.<br>Default value: 100</li>
+		<li><strong>Brightness %:</strong> Determines the brightness percentage of text/background in Dark mode and Reverse Colors.<br> e.g. 0 equals normal brightness in Dark mode and Reverse Colors.<br>Default value: 100</li>
+		<li><strong>Whitelist:</strong> Adds the website to the whitelist. This site will have custom settings different from preset settings.<br>Default value: disabled</li>
+		<li><strong>Dark mode:</strong> Should be enabled on "Black theme" or black background/light text websites. The Brightness and Contrast % can then be adjusted with the Contrast slider and Strenth slider which works as Brightness setting.<br>Default value: disabled</li>
+		<li><strong>Avoid colorful text:</strong>  Attempts to avoid colorful text and links, if they are considered readable.<br>Default value: enabled</li>
+		<li><strong>Underline links:</strong> Adds an underline to links, to distinguish them from other text.<br>Default value: disabled</li>
+		<li><strong>Reverse Colors mode:</strong> Reverses colors of a 'bright' site, so a light background site becomes black (but dark background site does NOT becomes bright. To force that to happen, also enable Dark mode). Text colors are also reversed. Images are unchanged as much as possible.<br>Default value: disabled</li>
+		<li><strong>Font name:</strong> Displays an input box for entering name of font to set on whole page.<br>Default value: disabled</li>
+		<li><strong>Invert Image colors:</strong> Does not apply reverse colors to images, causing images to appear in reverse colors.<br>Default value: enabled</li>
+		<li><strong>Reverse colors hue correction:</strong> Changes text colors to match those of website.<br> It is enabled when Reverse colors gets enabled. Default value: enabled</li>
+		<li><strong>Process :before/:after elements</strong> Makes background images in :before/:after elements have normal colors (if "Invert image colors" is enabled.<br>This also corrects the colors of :hover/:selection in reverse colors.<br>Changes font sizes if set in :before/:after in normal mode.<br>Default value: disabled</li>
+		<li><strong>Input border:</strong> Adds a black outline around input elements. When enabled with "Start 3" disabled and "Skip links" enabled, prevents changes of width / height of input text elements and does not add border.<br>Default value: disabled</li>
+		<li><strong>Force max opacity:</strong> Forces full opacity on all fonts.<strong> Also changes background color to black in reverse colors if "Skip links" is enabled and "Start 3 letters" disabled.</strong><br>Default value: disabled</li>
+		<li><strong>Skip headings:</strong> Avoids applying on head tags H1 to H4.<br>Default value: disabled</li>
+		<li><strong>Skip NAV & SECTION:</strong> Avoids changing size of NAV and SECTION elements (usually menus and large tables) and height change of INPUT elements.<br>Also skips applying reverse colors to title menu images of a page.<br>Default value: disabled</li>
+		<li><strong>Skip text height changes:</strong> Avoids changing size text whose height is less than font size and INPUT elements like text and select boxes.<br>Default value: disabled.</li>
+		<li><strong>Skip white text:</strong> Avoids applying on white text.<br>Default value: enabled</li>
+		<li><strong>High contrast Dark mode:</strong>Skips preserving image colors in Dark mode with different brightness / contrast settings. Some parts of page get a 'high contrast' effect depending on brightness / contrast values.<br>Default value: disabled</li>
+		<li><strong>ALL CAPITALS TEXT:</strong> Makes all text in CAPITALS.<br>Default value: disabled</li>
+		<li><strong>Starting 3 letters bold:</strong> Starting 3 letters of words are made bold.<br>Default value: disabled</li>
+		<li><strong>Skip links in 3 letters bold:</strong> Avoids changing links when start 3 letters bold is enabled.<br>Default value: disabled</li>
+		<li><strong>Apply custom CSS for site:</strong> Lets you enter custom CSS rules for the site.<br>Default value: disabled</li>
+		<li><strong>Process gradient colors:</strong> Enable / disable processing of background gradient colors in hue correction to keep original color pattern.<br>Default value: disabled</li>
+		<li><strong>Colorblind adjust colors:</strong> Changes text color and background to more readable color for colorblind condition.</li>
+		<li><strong>All Settings</strong> Opens a tab with all the options, including the ability to activate the add-on everywhere, the global options (with in-depth tooltips), the whitelist/blacklist, and a link to this page.</li>
+		<li><strong>The calculated website background colors are used to determine if site has "Light" theme (lightness greater than 0.5) or "Dark theme" (lightness less than 0.5).<br>On some sites this calculation may result in wrong theme choice (light website calculated as "dark" theme or reverse).<br>If this happens, override this value by setting both "Dark mode" and "Reverse Colors" to enabled.( This only applies if you want to keep a "Dark" mode or "Reverse colors" on the site)</strong></li>
+		</ul>
+<h4>TIPS for making page text better</h4>
+<ul>
+<li><b>For REVERSE COLORS enabled</b>, set in the "Global CSS" textbox on "All settings" the body background color to white / #FFFFFF. This can be done by copypaste this <span id="code"><code>body { background-color: #ffffff; }</code></span> to the global css box. This is required for browser to set background color REVERSED to black.</li>
+<li><b>VERY BIG text size difference</b> : To enable 'smaller text' mode, set <span id="variable">'--g_smaller_text'</span> constant to non-zero / 'true' value.<br>To change the amount of letter smallness, change the 'Increase font %' slider. Very high values (greater than 10 - 20) will make text VERY SMALL. Low values make them somewhat similar to 'smaller text' size.<br>Another way to change the smallness : Enable 'Force max opacity' and 'Skip links in 3 letter bold', while keeping 'Starting 3 letters bold' disabled, and then change 'Font Weight' slider to 100 - 900 (except 400 which is no change).<br>Weight slider at / near '400' will make no / little difference, while more / less away from 400 will change amount of 'font size change'.<br>This 'Force max opacity' + 'Skip links' enabled combination, and changing weight slider value, also works for 'normal' text size changes.</li>
+<li><b>'Dark mode' and 'High contrast dark mode' enabled</b> : If the page has dark theme, enabling 'Dark mode' and 'high contrast dark mode' allows changing brightness + contrast of page elements.<br>To apply brightness + contrast to more parts, or even whole page, set the <span id="variable">'--g_continue_speech'</span> to very high value (like 999 or more).<br>This value is the limit of number of images in a page to allow images (and text parts) to NOT get brightness + contrast. Making a large number will make ALL (or most) images and text get brightness + contrast applied.</li>
+<li><b>LOAD DELAY, when to use</b> : Setting <span id="variable">'--g_load_delay'</span> to some 50 to 5000 milliseconds creates a delay before processing. This may be needed on some pages if the colors after 'Reverse colors' enabled are not hue-corrected.<br>It also can prevent odd / unexpected colors in 'Dark mode'.</li>
+<li><b>Stylesheet rules buggy</b> : If stylesheet rules and their colors in 'Reverse colors' are unexpected, set <span id="variable">'--g_max_css_rules'</span> to zero (0), which will skip stylesheet processing completely.<br>Another way to skip ONLY stylesheet colors, is setting <span id="variable">'--g_skip_css'</span> to non-zero / true. This will only process stylesheet font size rules and skip CSS color rules.</li>
+<li><b>ICONS appear almost transparent</b> : Some sites in reverse colors have icon colors very faint. Setting <span id="variable">'--g_svg_bg_white'</span> to non-zero / true will make a white background to the SVG + PNG images.<br>The value 'dontinvert' will prevent 'Image invert colors' and make icons appear higher contrast.<br>Useful for page with lots of transparent images.</li>
+<li><b>Prevent contrast of text and keep hue-corrected colors</b> : The <span id="variable">'--g_bg_threshold'</span> value is added to Strength slider value and compared with text brightness. If text brightness is less than the sum, then text color is made 'high contrast' black / white.<br>This constant and strength slider value applies to all text in normal / dark mode / reverse colors.<br>To prevent high contrast of text color, change <span id="variable">'--g_bg_threshold'</span> to zero and / or change strength slider to large negative value.</li>
+<li><b>KEEP ORIGINAL page colors</b> : In 'Reverse colors', when <span id="variable">'--g_keep_colors'</span> is set to non-zero or true, the original page colors which have colorfulness more than '--g_min_colorfulness', are kept instead of hue-corrected colors.<br>To keep colors of only a part of page, set <span id="variable">'--g_skip_colors_(tags / ids / classes)'</span> to the tag / ID / class of element as found by 'Inspecting' the page. Example <br><span id="code"><code>html { --g_skip_colors_tags: body, footer; }</code></span><br>skips the elements with tag BODY and FOOTER.</li>
+<li><b>Change LINE SPACING</b> : The between-lines spacing of text depends on : <br>1. <span id="variable">'--g_max_child'</span> constant. Setting a very high value (like 999) makes text lines have narrow space between them, while also depending on 'Increase font %' value.<br>Changing <span id="variable">'--g_max_child'</span> to low value or zero creates larger gaps between lines.<br>2. Enabling 'Skip text height change' is similar to setting <span id="variable">'--g_max_child'</span> to zero, and line spacing is not changed.<br>3. Changing 'Increase Font %' slider adjusts the amount of spacing between lines. Lower values make for less, higher values for more space. Note that font size is also changed by 'Increase Font %'.</li>
+</ul>
+<h4>CAUTION AND WARNING</h4>
+<ul>
+<li><b>IMPORTANT WARNING: </b>The text on some pages with some settings CAN DISAPPEAR (appear invisible) due to changes done to the text colors. THIS IS KNOWN BEHAVIOR and requires changes to settings to keep text from disappearing.</li>
+<li><b>WARNING: </b>If you are COPY+PASTE-ing from a page which has been changed by this plugin, DISABLE the plugin for that webpage and THEN copy + paste. Otherwise a lot of styling changes will also get pasted which is not on the original webpage.</li>
+<li>As warned below, if you are using HTML Editors in software like Wordpress or similar, disable the plugin for that website to prevent styling changes from being entered in the HTML editor.</li>
+<li>ALSO IF YOU TAKE A PRINTOUT OF WEBPAGE changed by this extension, IT MAY NOT PRINT CORRECTLY. SO KEEP THE "Disable for this site" option ENABLED when PRINTING.</li>
+<li><b>DISABLE PLUGIN</b> = Select "Disable Better Text View for this site" or "Disable Better Text View on this site temporarily (keep settings)" option on Options menu or DISABLE "Activate on all websites" in All Settings page, whichever is preferred.</li>
+</ul>
+<h4>SUGGESTIONS OR ISSUES</h4>
+<ul>
+<li><em>Please excuse me, <span style="filter:blur(1.5px);">"the developer"</span>, from issues related to speed / slowness or bugs about text / background colors. I work alone on this extension and nobody tests this except me, myself and i. Also my brain isn't what it used to be when young (i'm over 50 years old) so there are no smart or ingenious algorithms in the code. Thanks for running BTV and hope the extension improves your browsing experience. Sincerely, the developer.</em></li>
+</ul></p>
+		<script src="src/img.js"></script>
+	</body>
+</html>
