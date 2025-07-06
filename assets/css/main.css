@@ -1,1 +1,79 @@
+@font-face {
+    font-family: 'Basic';
+    src: url('fonts/Basic-Regular.woff') format('woff');
+    font-weight: normal;
+}
+
+body {
+	background:white;
+	--check_color: #06d;
+	--check_bg: #cdcecf;
+}
+
+.slider:focus {
+    outline: none;
+}
+
+.slider::-moz-range-thumb
+{
+	background:white;
+	cursor:w-resize;
+}
+.slider::-moz-range-track 
+{
+	background: rgb(196, 196, 196);
+	cursor: pointer;
+}
+
+textarea,
+input[type="text"] {
+	color: black;
+	background-color: white;
+}
+textarea {
+	font-family: Monospace, mono;
+}
+
+@media (prefers-color-scheme: dark) {
+body {
+	background:#141a1f!important;
+	--check_color: #0df;
+	--check_bg: transparent;
+}
+label,h1,h2,h3,h4,li,p,b,.settings {
+	color: white!important;
+}
+span {
+	color: white!important;
+}
+.container input:checked ~ .checkmark {
+	background-color: #0077ff!important;
+}
+textarea,
+input[type="text"] {
+	color: white!important;
+	background-color: black!important;	
+}
+.slider::-moz-range-thumb 
+{
+	background-color: #0077ff!important;
+}
+table {
+	color: white!important;
+}
+tr:hover { 
+	color: black!important;
+}
+#url {
+	color: lightyellow!important;
+}
+#LightDark {
+	color: lightyellow!important;
+}
+
+::placeholder {
+    color: lime!important;
+}
+
+}
 

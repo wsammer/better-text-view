@@ -1,0 +1,308 @@
+/**
+ * Copyright (C) 2023-2025 Sameer W. All rights reserved.
+ * License: https://github.com/wsammer/better-text-view/blob/main/LICENSE
+ */
+
+html
+{
+    margin:0;
+    padding:0;
+}
+body
+{
+    font-family: 'Basic', sans-serif;
+    font-size: 18px;
+    margin:0;
+    padding:0;
+    width:640px;
+    height:100%;
+    margin:auto;
+    background:white;
+}
+#wrapper
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 15px;
+    margin-top: 5px;
+    z-index:-99999;
+}
+
+textarea {
+    width: 100%;
+    font-size: 16px;
+    color: black;
+    background: white;
+    font-family: Monospace, mono;
+}
+
+/* Sliders */
+
+.sliderDiv
+{
+    display:flex;
+    justify-content: space-between;
+    align-items:baseline;
+    margin-bottom: 2px;
+}
+
+.val 
+{
+    font-size:23px;
+    font-family: 'Basic', serif;
+    font-weight: 400;
+    margin-right: 10px;
+}
+.slider 
+{
+    width: 390px;
+    border-radius: 5px;
+    height: 19px;
+    position: relative;
+}
+
+.slider:focus {
+    outline: none;
+}
+.bgrange {
+border: 1px solid black;
+border-radius: 5px;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    border-radius: 1em;
+}
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  background: transparent; /* Otherwise white in Chrome */
+  height: 21px;
+  top: 5px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:active {
+filter: hue-rotate(90deg);
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+/* slider thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+
+    width: 15px;
+    height: 15px;
+    margin-top: -9px;
+    border: 0 solid black;
+    border-radius: 0;
+    background-color: transparent !important;
+    background-image: url('../../assets/icons/hcircle.svg');
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.slider::-moz-range-track
+{
+    width: 100%;
+    height: 0.5em;
+    border-radius: 1em;
+}
+#urlContainer 
+{
+	display:flex;
+	justify-content:center;
+
+	padding-top:0.4em;
+	padding-bottom:0;
+	height:1.2em;
+
+	position:relative;
+	z-index:1;
+}
+#url {
+
+	z-index:3;
+	
+	font-size: 100%;
+	font-family: 'Basic', sans-serif;
+	font-style: normal;
+	color: navy;
+	transition: opacity ease-out 0.1s;
+	
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow:ellipsis;
+}
+#refreshBtn
+{
+	position:absolute;
+	bottom:-8px;
+	opacity:0;
+	z-index:2;
+	
+	cursor: context-menu;
+	font-size:1em;
+	font-weight:normal;
+	color:navy;
+	border: 2px solid navy;
+	transition: opacity ease-in 0.3s;
+}
+#size-sliders
+{
+	border-left: 1px solid rgb(160, 160, 160);
+	border-radius: 1em;
+	margin-top:0.2em;
+	margin-bottom:0.2em;
+	padding-left:1em;
+	
+	display:flex;
+	flex-direction:column;
+	align-content:center;
+}
+
+/*Checkboxes*/
+#checksContainer {
+    margin-top:0.7em;
+    display:flex;
+    flex-flow: row wrap;
+    justify-content:space-between;
+    font-size:0.97em;
+    margin-bottom: -18px;
+}
+.separator{
+    margin-right:0.1em;
+    width:48%;
+    margin-bottom:0.5em;
+}
+.separator div {
+    margin-bottom:0.1em;
+}
+#sep{
+    margin-left:0.1em;
+    width:49%;
+}
+
+.separator:nth-child(3),
+.separator:nth-child(4) {
+    margin-bottom:0!important;
+}
+
+.option label:first-child {
+    display: block;
+    cursor: pointer;
+}
+
+.option label:first-child:hover {
+    color: #f00 !important;
+}
+
+/*Buttons/checkmarks*/
+
+
+button,
+input[type='button'],
+select {
+    font-size: 18px;
+    height: 36px;
+    cursor: pointer;
+    text-align: center;
+    font-family:"Basic";
+    font-weight:normal;
+    border-radius: 4px;
+    transition: background-color 0.1s ease-out;
+    color:black;
+    background-color: #eee;
+    border: 1px solid black;
+}
+button:hover,
+input[type='button']:hover {
+    color: white;
+    background-color: black;
+}
+#refreshBtn:hover 
+{
+    transition: color ease-out 0.1s;
+    transition: background-color ease-out 0.1s;
+    color:white;
+    background-color:navy;
+}
+#optionsBtn
+{
+    width:auto;
+    align-self:flex-end;
+    margin-bottom: auto;
+}
+input[type='checkbox'] {
+	height: 0;
+	width: 0;
+	visibility: hidden;
+}
+.container {
+	cursor: pointer;
+	width: 30px;
+	height: 18px;
+	background-color: var(--check_bg);
+	color: var(--check_bg);
+	display: block;
+	border-radius: 18px;
+	margin-top: -19px;
+	position: relative;
+	float: right;
+}
+input:checked ~ .checkmark:after {
+	margin-left: 10px;
+}
+.checkmark:after {
+	content: '';
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 28px;
+	height: 16px;
+	background-color: var(--check_bg);
+	color: var(--check_bg);
+	border-radius: 17px;
+	border: 1px solid  #000;
+	background-image:url('../../assets/icons/circle.svg');
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	background-size: 16px 16px;
+}
+input:checked ~ .checkmark:after {
+	position: absolute;
+	background-image:url('../../assets/icons/circle2.svg');
+	background-repeat: no-repeat;
+	background-size: 16px 16px;
+	background-position: 12px 0px;
+	background-color: var(--check_color);
+	border-radius: 17px;
+	border: 1px solid  var(--check_color);
+	color: #000;
+	width: 28px;
+	height: 16px;
+	left: -10px;
+	top: 0px;
+}
+
+
+@media (prefers-color-scheme: dark) {
+.checkmark:after {
+	border: 1px solid  #fff;
+}
+}
+
+@media (prefers-color-scheme: light) {
+.checkmark:after {
+	background-image:url('../../assets/icons/circle2.svg');
+}
+input:checked ~ .checkmark:after {
+	background-image:url('../../assets/icons/circle.svg');
+}
+}
