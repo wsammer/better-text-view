@@ -3420,13 +3420,15 @@ async function start(cfg, url)
 					let sw = style.getPropertyValue('width');
 					if (/\d+.*?px/.test(sw)) {
 						let nw = parseInt(sw);
-						nwidth = ';width: calc( ' + sw + ' + ' + cfg.size + '% );';
-						if (pnode != null && pnode.getBoundingClientRect && node.firstElementChild != null) {
-							if (node.firstElementChild.getBoundingClientRect().left - pnode.getBoundingClientRect().left > 180)
-								nwidth = nwidth + 'margin-left:-'+cfg.size/2+'%;';
-						}
-						if (isNaN(nw) || nw/parseInt(window.innerWidth) < 0.6)
+						if (isNaN(nw) || nw/parseInt(window.innerWidth) < 0.6 || nw/parseInt(window.innerWidth) > 0.95) {
 							nwidth = '';
+						} else {
+							nwidth = ';width: calc( ' + sw + ' + ' + cfg.size + '% );';
+							if (pnode != null && pnode.getBoundingClientRect && node.firstElementChild != null) {
+								if (node.firstElementChild.getBoundingClientRect().left - pnode.getBoundingClientRect().left > 180)
+									nwidth = nwidth + 'margin-left:-'+cfg.size/2+'%;';
+							}
+						}
 					}
 					let sh = style.getPropertyValue('height');
 					let sfz = parseInt(style.getPropertyValue('font-size'));
@@ -3657,7 +3659,7 @@ async function start(cfg, url)
 			
 			function getBgColor(n) {
 				let pnode = n.parentElement;
-				let bg_color = getComputedStyle(pnode).backgroundColor;
+				let bg_color = 'transparent';
 				while (pnode && /(\(0\, 0\, 0\, 0\)|transparent)/i.test(bg_color)) {
 					bg_color = getComputedStyle(pnode).backgroundColor;
 					pnode = pnode.parentElement;
