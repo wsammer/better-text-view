@@ -758,8 +758,8 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		if (mtrIndic.includes(word.charCodeAt(2)) || mtrIndic.includes(word.charCodeAt(3)) || mtrIndic.includes(word.charCodeAt(4)) || mtrIndic.includes(word.charCodeAt(5))) {
 			if (mtrIndic.includes(word.charCodeAt(2))) boldNum =Math.min(word.length,4);
 			if (mtrIndic.includes(word.charCodeAt(3))) boldNum =Math.min(word.length,5);
-			if (mtrIndic.includes(word.charCodeAt(4))) boldNum =Math.min(word.length,6);
-			if (mtrIndic.includes(word.charCodeAt(5))) boldNum =Math.min(word.length,7);
+			//if (mtrIndic.includes(word.charCodeAt(4))) boldNum =Math.min(word.length,6);
+			//if (mtrIndic.includes(word.charCodeAt(5))) boldNum =Math.min(word.length,7);
 		}
 		if (mtrIndic.includes(word.charCodeAt(boldNum)) && boldNum+1 <= word.length) boldNum++;
 		if (mtrIndic.includes(word.charCodeAt(boldNum)) && boldNum+1 <= word.length) boldNum++;
@@ -1610,7 +1610,7 @@ async function start(cfg, url)
 	}
 	if (docs.getPropertyValue('--g_start3_caps')) {
 	g_start3_caps = docs.getPropertyValue('--g_start3_caps');
-	if (/\b(line|para)\b/.test(g_start3_caps))
+	if (/\b(line|para|fast)\b/i.test(g_start3_caps))
 		g_start3_caps = g_start3_caps.replaceAll(/[\'\"]/g,'');
 	else
 		g_start3_caps = 'font-variant-caps:small-caps!important;';
@@ -1789,6 +1789,7 @@ async function start(cfg, url)
 	var n_total = 0;
 	var b_imp='', bg_imp='', fg_imp='';
 	let b_css_error = false;
+	let b_fast = /fast/i.test(g_start3_caps);
 
 	var doc = document;
 	//m_sty['rgb(255, 255, 255)'] = 'rgb(0, 0, 0)';
@@ -3024,6 +3025,7 @@ async function start(cfg, url)
 		b_dim = {};
 		node_count = save_nc;
 		node = nodes[node_count];
+		toset_colors.length = 0;
 
 		let setAttribs = node => {
 
@@ -3032,7 +3034,6 @@ async function start(cfg, url)
 			let sk = false;
 			let is_einput = /\b(INPUT|SELECT|TEXT|TEXTAREA)\b/.test(tag);
 			var style, is_oinput, is_xinput;
-			toset_colors.length = 0;
 
 			//if (tags_to_skip.includes(tag) || nodes_to_skip.includes(node) || (cfg.skipHeadings && hdr_tags.includes(tag))) return;
 			if (nodes_to_skip.includes(node)) return;
@@ -3046,6 +3047,7 @@ async function start(cfg, url)
 			}
 
 			node_count = map.get(node);
+			toset_colors[node_count] = [];
 
 			if (is_einput) {
 				is_xinput = node.type && g_nokinput.test(node.type);
@@ -3129,11 +3131,11 @@ async function start(cfg, url)
 					let gcsa = style;
 					if (gcsa && gcsa != undefined && /gradient/.test(gcsa.backgroundImage)) {
 						gs2 = getGradient(gcsa);
-						toset_colors[3] = [gs2,'important'];
+						toset_colors[node_count][3] = [gs2,'important'];
 						b_cdone[node_count] = true;
 						fgarr = getRGBarr(gcsa.backgroundColor);
 						fgr = [ 255-fgarr[0],255-fgarr[1],255-fgarr[2],fgarr[3] ];
-						toset_colors[1] = ['rgba('+fgr+')','important'];
+						toset_colors[node_count][1] = ['rgba('+fgr+')','important'];
 					}
 					gcsa = getComputedStyle(node,':before');
 					if (!b_gd && gcsa && gcsa != undefined && /gradient/.test(gcsa.backgroundImage)) {
@@ -3149,7 +3151,7 @@ async function start(cfg, url)
 						b_gd = 1;
 						fgarr = getRGBarr(gcsa.backgroundColor);
 						fgr = [ 255-fgarr[0],255-fgarr[1],255-fgarr[2],fgarr[3] ];
-						toset_colors[1] = ['rgba('+fgr+')','important'];
+						toset_colors[node_count][1] = ['rgba('+fgr+')','important'];
 					}
 					gcsa = getComputedStyle(node,':after');
 					if (!b_gd && gcsa && gcsa != undefined && /gradient/.test(gcsa.backgroundImage)) {
@@ -3165,7 +3167,7 @@ async function start(cfg, url)
 						b_gd = 2;
 						fgarr = getRGBarr(gcsa.backgroundColor);
 						fgr = [ 255-fgarr[0],255-fgarr[1],255-fgarr[2],fgarr[3] ];
-						toset_colors[1] = ['rgba('+fgr+')','important'];
+						toset_colors[node_count][1] = ['rgba('+fgr+')','important'];
 					}
 					if (b_gd)
 						if (b_gd == 1)
@@ -3222,7 +3224,7 @@ async function start(cfg, url)
 							fgr = getRGBarr(m_sty[fg]);
 						if (fg != m_sty[fg]) {
 						fgr[3] = fgarr[3];
-						toset_colors[0] = ['rgba('+fgr+')',fg_imp]; //node.style.setProperty('color','rgba('+fgr+')',fg_imp);
+						toset_colors[node_count][0] = ['rgba('+fgr+')',fg_imp];
 						fgp = true;
 						m_fcol.set(node, fgarr);
 						}
@@ -3233,7 +3235,7 @@ async function start(cfg, url)
 					fgbrt = calcBrightness(fgr);
 					if (fgbrt >= 0) {
 						m_fcol.set(node, fgarr);
-						toset_colors[0] = ['rgba('+fgr+')',fg_imp]; //node.style.setProperty('color','rgba('+fgr+')',fg_imp);
+						toset_colors[node_count][0] = ['rgba('+fgr+')',fg_imp];
 						fgp = true;
 						//m_imp[m_sty[fg]] = fg;
 					}
@@ -3242,7 +3244,7 @@ async function start(cfg, url)
 					} else {
 					fgr = [ 255-fgarr[0], 255-fgarr[1], 255-fgarr[2], fgarr[3] ];
 					m_fcol.set(node, fgarr);
-					toset_colors[0] = ['rgba('+fgr+')',fg_imp]; //node.style.setProperty('color','rgba('+fgr+')',fg_imp);
+					toset_colors[node_count][0] = ['rgba('+fgr+')',fg_imp];
 					fgp = true;
 					}
 					}
@@ -3253,7 +3255,7 @@ async function start(cfg, url)
 					else if (g_white.includes(fg) && (cfg.skipWhites || !cfg.skipBlack))
 						fgr = [ 0, 0, 0, 1 ];
 					m_fcol.set(node, fgarr);
-					toset_colors[0] = ['rgba('+fgr+')',fg_imp]; //node.style.setProperty('color','rgba('+fgr+')',fg_imp);
+					toset_colors[node_count][0] = ['rgba('+fgr+')',fg_imp];
 					fgp = true;
 					s_b = true;
 					}
@@ -3261,7 +3263,7 @@ async function start(cfg, url)
 					fgr = [ 255-fgarr[0], 255-fgarr[1], 255-fgarr[2], fgarr[3] ];
 					if (calcColorfulness(fgr) > g_min_colorfulness) {
 						m_fcol.set(node, fgr);
-						toset_colors[0] = ['rgba('+fgr+')',fg_imp]; //node.style.setProperty('color','rgba('+fgr+')',fg_imp);
+						toset_colors[node_count][0] = ['rgba('+fgr+')',fg_imp];
 					}
 					}
 				}
@@ -3310,7 +3312,7 @@ async function start(cfg, url)
 					if (bgbrt >= 0 && (fgr[0] != fgarr[0] || fgr[1] != fgarr[1] || fgr[2] != fgarr[2] || fgr[3] != fgarr[3])) {
 						m_bocol.set(node, fgarr);
 						bogp = true;
-						toset_colors[idx] = ['rgba('+fgr+')',b_imp]; //node.style.setProperty('border-color','rgba('+fgr+')',b_imp);
+						toset_colors[node_count][idx] = ['rgba('+fgr+')',b_imp];
 					}
 					}
 					}
@@ -3319,7 +3321,7 @@ async function start(cfg, url)
 					fgr = [ 255-fgarr[0], 255-fgarr[1], 255-fgarr[2], fgarr[3] ];
 					if (calcColorfulness(fgr) > g_min_colorfulness) {
 						m_bocol.set(node, fgr);
-						toset_colors[4] = ['rgba('+fgr+')',b_imp]; //node.style.setProperty('border-color','rgba('+fgr+')',b_imp);
+						toset_colors[node_count][4] = ['rgba('+fgr+')',b_imp];
 					}
 					}
 				}
@@ -3331,15 +3333,15 @@ async function start(cfg, url)
 					if (cfg.doGradients && style.backgroundImage.indexOf('gradient') > -1) {
 					if (b_cdone[node_count] != true) {
 						let gs2 = getGradient(style);
-						toset_colors[3] = [gs2,'important']; //node.style.setProperty('background-image',gs2,'important');
+						toset_colors[node_count][3] = [gs2,'important']; //node.style.setProperty('background-image',gs2,'important');
 						if (!fgp) {
 						fgarr = getRGBarr(fg);
 						fgr = [ 255-fgarr[0],255-fgarr[1],255-fgarr[2],fgarr[3] ];
-						toset_colors[0] = ['rgba('+fgr+')','important']; //node.style.setProperty('color','rgba('+fgr+')','important');
+						toset_colors[node_count][0] = ['rgba('+fgr+')','important']; //node.style.setProperty('color','rgba('+fgr+')','important');
 						}
 						fgarr = getRGBarr(bg);
 						fgr = [ 255-fgarr[0],255-fgarr[1],255-fgarr[2],fgarr[3] ];
-						toset_colors[1] = ['rgba('+fgr+')','important']; //node.style.setProperty('background-color','rgba('+fgr+')','important');
+						toset_colors[node_count][1] = ['rgba('+fgr+')','important']; //node.style.setProperty('background-color','rgba('+fgr+')','important');
 						skip_contrast = true;
 						b_cdone[node_count] = true;
 					}
@@ -3358,7 +3360,7 @@ async function start(cfg, url)
 							fgr = getRGBarr(m_sty[bg]);
 						if (bg != m_sty[bg]) {
 						fgr[3] = fgarr[3];
-						toset_colors[bg_attr] = ['rgba('+fgr+')',bg_imp]; //node.style.setProperty(bg_attr,'rgba('+fgr+')',bg_imp);
+						toset_colors[node_count][bg_attr] = ['rgba('+fgr+')',bg_imp];
 						bgp = true;
 						m_bcol.set(node, fgarr);
 						}
@@ -3369,7 +3371,7 @@ async function start(cfg, url)
 					bgbrt = calcBrightness(fgr);
 					if (bgbrt > 0) {
 						m_bcol.set(node, fgarr);
-						toset_colors[bg_attr] = ['rgba('+fgr+')',bg_imp]; //node.style.setProperty(bg_attr,'rgba('+fgr+')',bg_imp);
+						toset_colors[node_count][bg_attr] = ['rgba('+fgr+')',bg_imp];
 						bgp = true;
 						//m_imp[m_sty[bg]] = bg;
 					}
@@ -3379,7 +3381,7 @@ async function start(cfg, url)
 					fgr = [ 255-fgarr[0], 255-fgarr[1], 255-fgarr[2], fgarr[3] ];
 					bgbrt = calcBrightness(fgr);
 					m_bcol.set(node, fgarr);
-					toset_colors[bg_attr] = ['rgba('+fgr+')',bg_imp]; //node.style.setProperty(bg_attr,'rgba('+fgr+')',bg_imp);
+					toset_colors[node_count][bg_attr] = ['rgba('+fgr+')',bg_imp];
 					bgp = true;
 					}
 					}
@@ -3387,7 +3389,7 @@ async function start(cfg, url)
 					fgr = [ 255-fgarr[0], 255-fgarr[1], 255-fgarr[2], fgarr[3] ];
 					if (calcColorfulness(fgr) > g_min_colorfulness) {
 						m_bcol.set(node, fgr);
-						toset_colors[2] = ['rgba('+fgr+')',bg_imp]; //node.style.setProperty('background','rgba('+fgr+')',bg_imp);
+						toset_colors[node_count][2] = ['rgba('+fgr+')',bg_imp];
 					}
 					}
 				}
@@ -3510,7 +3512,7 @@ async function start(cfg, url)
 					if (pcol.substr(0,4).indexOf('rgba') > -1) {
 						b_idone[ocol] = cola;
 						b_idone[cola] = cola;
-						toset_colors[0] = [pcol,'important']; //node.style.setProperty('color', pcol,'important');
+						toset_colors[node_count][0] = [pcol,'important']; //node.style.setProperty('color', pcol,'important');
 					}
 					}
 					if (style.backgroundColor && !colors_to_skip.includes(style.backgroundColor)) {
@@ -3529,7 +3531,7 @@ async function start(cfg, url)
 					if (pcol.substr(0,4).indexOf('rgba') > -1 && pcol != style.color) {
 						b_idone[ocol] = cola;
 						b_idone[cola] = cola;
-						toset_colors[1] = [pcol,'important']; //node.style.setProperty('background-color', pcol,'important');
+						toset_colors[node_count][1] = [pcol,'important']; //node.style.setProperty('background-color', pcol,'important');
 					}
 					}
 					if (style.borderColor && !colors_to_skip.includes(style.borderColor)) {
@@ -3550,15 +3552,15 @@ async function start(cfg, url)
 						b_idone[ocol] = cola;
 						b_idone[cola] = cola;
 						if (bog == style.borderColor)
-							toset_colors[4] = [pcol,'important']; //node.style.setProperty('border-color',pcol,'important');
+							toset_colors[node_count][4] = [pcol,'important']; //node.style.setProperty('border-color',pcol,'important');
 						else if (bog == style.borderTopColor)
-							toset_colors[5] = [pcol,'important']; //node.style.setProperty('border-top-color',pcol,'important');
+							toset_colors[node_count][5] = [pcol,'important']; //node.style.setProperty('border-top-color',pcol,'important');
 						else if (bog == style.borderBottomColor)
-							toset_colors[6] = [pcol,'important']; //node.style.setProperty('border-bottom-color',pcol,'important');
+							toset_colors[node_count][6] = [pcol,'important']; //node.style.setProperty('border-bottom-color',pcol,'important');
 						else if (bog == style.borderLeftColor)
-							toset_colors[7] = [pcol,'important']; //node.style.setProperty('border-left-color',pcol,'important');
+							toset_colors[node_count][7] = [pcol,'important']; //node.style.setProperty('border-left-color',pcol,'important');
 						else if (bog == style.borderRightColor)
-							toset_colors[8] = [pcol,'important']; //node.style.setProperty('border-right-color',pcol,'important');
+							toset_colors[node_count][8] = [pcol,'important']; //node.style.setProperty('border-right-color',pcol,'important');
 					}
 					}
 				}
@@ -3608,7 +3610,7 @@ async function start(cfg, url)
 					if (nsty && !cfg.skipHeights)
 						node.setAttribute('style', nsty);
 					}
-					if (!node.disabled && (!toset_colors[0] || toset_colors[0] == undefined) && (is_einput || is_oinput)) {
+					if (!node.disabled && (!toset_colors[node_count][0] || toset_colors[node_count][0] == undefined) && (is_einput || is_oinput)) {
 					let txtcolor = style.color;
 					if (txtcolor == null || txtcolor.length < 1) txtcolor = 'rgb(0,0,0)';
 					let txt_brt = calcBrightness(getRGBarr(txtcolor));
@@ -3623,7 +3625,7 @@ async function start(cfg, url)
 						txtcolor = 'rgb(255, 255, 255)';
 					else
 						txtcolor = 'rgb(0, 0, 0)';
-					toset_colors[0] = [txtcolor,'important']; //node.style.setProperty('color',txtcolor,'important');
+					toset_colors[node_count][0] = [txtcolor,'important']; //node.style.setProperty('color',txtcolor,'important');
 					skip_contrast = true;
 					if (cfg.forcePlhdr && cfg.forceIInv)
 						node.style.setProperty('filter','unset');
@@ -3727,24 +3729,37 @@ async function start(cfg, url)
 					else if (bstl == 'rgb(255, 255, 255)')
 						bstl = 'rgb(0, 0, 0)';*/
 				if (bstl && style.color.indexOf(bstl) < 0)
-					toset_colors[0] = [bstl,'important']; //node.style.setProperty('color',bstl,'important');
+					toset_colors[node_count][0] = [bstl,'important']; //node.style.setProperty('color',bstl,'important');
 			}
 		};
 
 		const iterateBigArr = (arr) => {
-			var el_count;
-			for (let el of arr) {
-				if (doc_obs != undefined && doc_obs != null)
-					doc_obs.disconnect();
+			var el, el_count, nc;
+			if (doc_obs != undefined && doc_obs != null)
+				doc_obs.disconnect();
+			for (el of arr) {
 				setAttribs(el);
-				if (toset_colors != undefined) {
-					for (el_count = 0; el_count < 9; el_count++) {
-						if (toset_colors[el_count] && toset_colors[el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[el_count][0],toset_colors[el_count][1]);
+				if (!b_fast) {
+					nc = map.get(el);
+					if (nc && nc != undefined && toset_colors[nc] && toset_colors[nc] != undefined) {
+						for (el_count = 0; el_count < 9; el_count++) {
+							if (toset_colors[nc][el_count] && toset_colors[nc][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc][el_count][0],toset_colors[nc][el_count][1]);
+						}
 					}
 				}
-				if (doc_obs != undefined && doc_obs != null)
-					doc_obs.observe(document.body, { childList: true, subtree: true });
 			}
+			if (b_fast) {
+				for (el of arr) {
+					nc = map.get(el);
+					if (nc && nc != undefined && toset_colors[nc] && toset_colors[nc] != undefined) {
+						for (el_count = 0; el_count < 9; el_count++) {
+							if (toset_colors[nc][el_count] && toset_colors[nc][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc][el_count][0],toset_colors[nc][el_count][1]);
+						}
+					}
+				}
+			}
+			if (doc_obs != undefined && doc_obs != null)
+				doc_obs.observe(document.body, { childList: true, subtree: true });
 		}
 
 		iterateBigArr(nodes);
