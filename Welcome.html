@@ -74,6 +74,7 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>Setting <span id="variable">'--g_start3_caps'</span> to "fast" or 'fast' (with quotes) improves speed of reverse colors processing. BEWARE, the text/background colors on some sites will not be same as before if 'fast' option is set.</li>
 <li>Stupid bug! Fixed for 'Keep black text' option.</li>
 <li>Audio text through TTS now WORKS FOR NON-ENGLISH language pages after bugfix.</li>
 <li>'--g_keep_colors' works as it should, keeping background and text colors whose colorfulness is more than '--g_min_colorfulness'. However, setting brightness and contrast to non-100% will not affect the 'kept' colors and they remain unchanged.<br>If a very low '--g_min_colorfulness' value (like -1) is set, the resulting page will be almost exact replica of original site page.</li>
@@ -246,7 +247,7 @@
 <li><b><span id="variable">--g_keep_colors</span> : </b> Keep original colors in hue correction of reverse colors. <br>Default value is false (0).</li>
 <li><b><span id="variable">--g_zoom_padding</span> : </b> Sets the padding of top left bottom right areas of zoom.<br>Default value is 0% 15% 0% 15% for left and right 15% padding (works well on slashdot.org).</li>
 <li><b><span id="variable">--g_max_css_rules</span> : </b> The maximum number of CSS rules allowed in a stylesheet beyond which its processing is skipped.<br>Default value is 100.</li>
-<li><b><span id="variable">--g_start3_caps</span> : </b> If enabled, makes "start 3 bold" option have CAPITAL text along with bold style.<br>Default value is false.</li>
+<li><b><span id="variable">--g_start3_caps</span> : </b> If enabled, makes "start 3 bold" option have CAPITAL text along with bold style.<br>If set to 'fast'/"fast" (with quotes), reverse colors processing is faster. HOWEVER, some text/background colors will not be as before.<br>Default value is false.</li>
 <li><b><span id="variable">--g_load_crossorigin</span> : </b> If a cross-origin stylesheet's rules are not accessible, enabling this variable will load the contents of stylesheet from its URL.<br>Default value is false.</li>
 <li><b><span id="variable">--g_speech_language</span> : </b> The language of Text-To-Speech output. If not specified, it is the language specified in webpage.<br>Default value is webpage's language.</li>
 <li><b><span id="variable">--g_continue_speech</span> : </b> If set to true (or not false), Text-To-Speech continues reading even after zoom key is un-pressed.<br>If disabled, TTS stops speaking after releasing zoom key.<br>Default value is false.</li>
