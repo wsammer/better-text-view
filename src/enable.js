@@ -548,6 +548,8 @@ var g_skip_css_colors;
 var g_load_delay;
 var g_site_reminder;
 var g_max_text;
+var g_btvfont;
+var g_tags_to_skip;
 
 const focalAnchors = {};
 focalAnchors.attrNameContainer = 'f-a-h';
@@ -890,6 +892,7 @@ async function isImage(ch, nc, imar, gcs, b_imgforce) {
 	case 'EMBED':
 	case 'OBJECT':
 	case 'CANVAS':
+		if (g_tags_to_skip.indexOf(itag) < 0) return false;
 		wi = parseInt(ch.width);
 		he = parseInt(ch.height);
 		if (!wi && !he) {
@@ -1653,6 +1656,14 @@ async function start(cfg, url)
 	g_site_reminder = docs.getPropertyValue('--g_site_reminder');
 	else
 	g_site_reminder = '';
+	if (docs.getPropertyValue('--g_btvfont'))
+	g_btvfont = docs.getPropertyValue('--g_btvfont');
+	else
+	g_btvfont = '';
+	if (docs.getPropertyValue('--g_tags_to_include'))
+	g_tags_to_skip = docs.getPropertyValue('--g_tags_to_include');
+	else
+	g_tags_to_skip = '';
 
 	if (docs.getPropertyValue('--g_skip_colors_classes')) {
 		let skipcols = docs.getPropertyValue('--g_skip_colors_classes');
@@ -1737,6 +1748,25 @@ async function start(cfg, url)
 		g_load_delay = 0;
 		g_site_reminder = '';
 		g_max_text = 95;
+		g_btvfont = '';
+		g_tags_to_skip = '';
+	}
+
+	if (g_tags_to_skip && g_tags_to_skip != undefined) {
+		let gtags = 'CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO';
+		let farr = [];
+		for (let tg of tags_to_skip) {
+			if (g_tags_to_skip.indexOf(tg) > -1) {
+				let repl = gtags.replaceAll(tg,'');
+				gtags = repl;
+			} else {
+				farr.push(tg);
+			}
+		}
+		tags_to_skip = farr.slice();
+		g_tags_to_skip = gtags;
+	} else {
+		g_tags_to_skip = 'CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO';
 	}
 
 	if (g_load_delay > 0) {
@@ -2243,7 +2273,7 @@ async function start(cfg, url)
 		g_skip_css_colors = false;
 	}
 
-	if (!cfg.fontFamilyName || !cfg.fontFamily) {
+	if ((!cfg.fontFamilyName || !cfg.fontFamily) && !g_btvfont) {
 		let rul = 'var(--g_btvfont)';
 		if (style_node.sheet != undefined) {
 		let rl = style_node.sheet.cssRules;
@@ -2258,7 +2288,7 @@ async function start(cfg, url)
 		if (cfg.fontFamily) {
 			document.documentElement.style.setProperty('--g_btvfont',cfg.fontFamilyName);
 			g_fntRule = true;
-		} else {
+		} else if (!g_btvfont) {
 			fntFmly = '';
 			document.documentElement.style.setProperty('--g_btvfont','');
 			g_fntRule = false;
@@ -2370,7 +2400,7 @@ async function start(cfg, url)
 				let gcs = getComputedStyle(targ);
 				targ.style.zIndex = '99999';
 				targ.style.position = 'relative';
-				if (!/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/i.test(targ.nodeName) && !/(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src))
+				if (g_tags_to_skip.indexOf(targ.nodeName.toUpperCase()) < 0 && !/(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src))
 					targ.style.padding = g_zoom_padding;
 				targ.style.transformOrigin = e.offsetX+'px '+e.offsetY+'px';
 				let co = getRGBarr(gcs.color) || [127,127,127,1.0];
@@ -2612,8 +2642,7 @@ async function start(cfg, url)
 			nc++;
 			map.set(n, nc);
 			let t = n.nodeName.toUpperCase();
-			let chln = n.childNodes; //n.getElementsByTagName('*');
-			b_chk[nc] = chln.length;
+			b_chk[nc] = n.children.length;
 			if (n.shadowRoot && n.shadowRoot != undefined)
 			if ((!n.host || n.host == undefined) && isCustomElement(n)) {
 				if (n.attachShadow) {
@@ -2637,13 +2666,13 @@ async function start(cfg, url)
 
 			let gcs = getComputedStyle(n);
 //			if (gcs.color && !/(none|undefined)/.test(gcs.color)) orig_colors[nc] = [gcs.color,gcs.backgroundColor||gcs.background,gcs.borderTopColor||gcs.borderRightColor||gcs.borderBottomColor||gcs.borderLeftColor,gcs.borderWidth];
-			if (/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/.test(t) || /(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src)) {
-				let x = img_dat.get(gcs.backgroundImage+gcs.content+gcs.src);
+			if (g_tags_to_skip.indexOf(t) > -1 || /(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src)) {
+				let x = img_dat.get(t+gcs.backgroundImage+gcs.content+gcs.src);
 				if (x && x != undefined) {
 					[ b_iimg[nc], img_area[nc], b_imgforce[nc] ] = x;
 				} else {
 					b_iimg[nc] = await isImage(n, nc, img_area, gcs, b_imgforce);
-					img_dat.set(gcs.backgroundImage+gcs.content+gcs.src, [ b_iimg[nc],img_area[nc],b_imgforce[nc] ]);
+					img_dat.set(t+gcs.backgroundImage+gcs.content+gcs.src, [ b_iimg[nc],img_area[nc],b_imgforce[nc] ]);
 				}
 			} else {
 				b_iimg[nc] = false;
@@ -2879,7 +2908,7 @@ async function start(cfg, url)
 			if (!imsrc || imsrc == 'none')
 				imsrc = '';
 			let cosrc = '';
-			if (!/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/i.test(img.nodeName) && !bgim && !imsrc)
+			if (g_tags_to_skip.indexOf(img.nodeName.toUpperCase()) < 0 && !bgim && !imsrc)
 				if (!/(http|url)/i.test(cst.content)) {
 				b_iimg[n_c] = false; continue;
 				} else {
@@ -2887,7 +2916,7 @@ async function start(cfg, url)
 				}
 			let bgsrco = bgim+imsrc+cosrc;
 			if (!b_imgforce[n_c] || b_ctext[n_c] > g_max_text)
-			if (!/^(CANVAS|EMBED|IMG|OBJECT|SVG|VIDEO)$/i.test(img.nodeName))
+			if (g_tags_to_skip.indexOf(img.nodeName.toUpperCase()) < 0)
 			if (!/(background.*page|banner|page.*background|slide)/ig.test(img.className) && (!/(http|url)/ig.test(bgsrco) || (b_ctext[n_c] > g_max_text && !b_imgforce[n_c])) || (((img_area[n_c] > 0 && img_area[n_c] < g_min_image_size && img.textContent.indexOf(' ') > -1 && !/button/i.test(img.className)) || /nav/i.test(img.className)) && !b_imgforce[n_c] && img_area[n_c] < g_min_image_size && img_area[n_c] > 0)) {
 				if (!(hdr && hdr.contains(img))) {
 				img.style.setProperty('filter','unset');
@@ -3206,7 +3235,7 @@ async function start(cfg, url)
 					bbog = nsty.indexOf('border') > -1;
 					bbg = nsty.indexOf('background') > -1;
 				}
-				if (fg == fg2 && bg == bg2 && bog == bog2 && cs.backgroundImage.indexOf('gradient') < 0 && pcs.backgroundImage.indexOf('gradient') < 0) {
+				if (fg == fg2 && bg == bg2 && bog == bog2 && b_ctext[node_count] == b_ctext[map.get(pnode)] && cs.backgroundImage.indexOf('gradient') < 0 && pcs.backgroundImage.indexOf('gradient') < 0) {
 				} else {
 				if (fg && (bfg || m_imp[fg] == undefined)) {
 					let fgarr = getRGBarr(fg);
@@ -3399,7 +3428,7 @@ async function start(cfg, url)
 			}
 
 			if (!is_einput)
-			if ((node.children.length == 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]) || (node.children.length > 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]+b_ctext[map.get(node.lastElementChild)]))
+			if ((b_chk[node_count] == 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]) || (b_chk[node_count] > 1 && b_ctext[node_count] <= b_ctext[map.get(node.firstElementChild)]+b_ctext[map.get(node.lastElementChild)]))
 				return;
 
 			if (!cfg.skipNavSection && b_chk[node_count] > 5) {
