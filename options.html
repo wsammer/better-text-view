@@ -691,7 +691,7 @@
 
 			<label class ="vars">
 			<label>--g_change_vars
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>The variables having color values are changed instead of the element's color in hue correction, if enabled. May be needed on some sites having color values in variables.<br>Default value is false.
 				</p>
 			</div>
@@ -700,7 +700,7 @@
 
 			<label class ="vars">
 			<label>--g_min_image_size
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>Images smaller than this minimum image size (in pixels square) are not inverted in reverse colors with 'Force Invert Image' enabled.<br>Also if size (area) is greater than 100 times this value, background images of BODY tag preserve their colors. Setting this to a low value (1 to 50) will preserve most background images.<br>If a background color for BODY is also set, setting the '--g_min_colorfulness' to a low (even negative) value will preserve image and colors. If the background color only requires to be set and not background image, try setting g_min_image_size to a very high (9999 or higher) value so that only colors are processed and not background image.<br>Default value is 199.
 				</p>
 			</div>
@@ -709,7 +709,7 @@
 
 			<label class ="vars">
 			<label>--g_smaller_text
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>Opposite of 'inverse text increase'. Text size is decreased instead of increased to make text appear similar to original webpage. The amount of decrease is adjustable by 'Increase font %'.<br>Default value is false.
 				</p>
 			</div>
@@ -718,7 +718,7 @@
 
 			<label class ="vars">
 			<label>--g_skip_css_colors
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>Enabling this skips hue correction (and contrast) of colors of elements processed in stylesheets.<br>To skip the stylesheet color processing, use '--g_skip_css'.<br>To skip hue correction AFTER stylesheets, use '--g_skip_colors_tags: body;', which will not hue correct all elements under 'BODY' tag and body also.<br>Setting it to greater than 10 skips more elements, and if greater than 99, skips text contrast.<br>Default value is disabled.
 				</p>
 			</div>
@@ -727,7 +727,7 @@
 
 			<label class ="vars">
 			<label>--g_load_delay
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>Delays start of processing by milliseconds of variable value.<br>Default value is 0.
 				</p>
 			</div>
@@ -736,7 +736,7 @@
 
 			<label class ="vars">
 			<label>--g_site_reminder
-			<div style="display:inline-block;" class="help-tip2">
+			<div class="help-tip2">
 				<p>This variable can be set in site's Custom CSS, which is then displayed in an alert box popup on EVERY visit to site.<br>Default value is empty string.
 				</p>
 			</div>
@@ -745,8 +745,26 @@
 
 			<label class ="vars">
 			<label>--g_final_lightness
-			<div style="display:inline-block;" class="help-tip2">
-				<p>This can be set to values between 0 and 1, with more than 0.5 indicates a light theme, less than 0.5 a dark theme. If the site has wrong theme detected, setting this variable forces the theme lightness / darkness.
+			<div class="help-tip2">
+				<p>This can be set to values between 0 and 1, with more than 0.5 indicates a light theme, less than 0.5 a dark theme. If the site has wrong theme detected, setting this variable forces the theme lightness / darkness.<br>Default value is unset / undefined.
+				</p>
+			</div>
+			</label>
+			</label>
+
+			<label class ="vars">
+			<label>--g_btvfont
+			<div class="help-tip2">
+				<p>Setting this will change font for site if in Custom CSS popup, or for all sites if in All Settings. The fonts set through popup 'Font name:' option take priority over this variable.<br>Default value is empty string ('').
+				</p>
+			</div>
+			</label>
+			</label>
+
+			<label class ="vars">
+			<label>--g_tags_to_include
+			<div class="help-tip2">
+				<p>Set this to include any of CANVAS / EMBED / IMG / OBJECT / SVG / VIDEO tags, which are normally skipped for processing text. Entries should be in capital letters.<br>Default value is empty string ('').
 				</p>
 			</div>
 			</label>
