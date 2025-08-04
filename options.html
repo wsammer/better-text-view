@@ -79,9 +79,7 @@
 					<p>
 					1. Adjusts the contrast of text color.<br>
 					2. Sets the zoom % of "Shift + zoom".<br>
-					3. If ODD value, sets the high contrast color of input textboxes.<br>
 					<br>If the text contrast is very high or to get original colors, decrease this to high negative values.<br>For getting high(est) contrast, increase this to high positive value 100 to 300.<br>
-					If strength is ODD number, input textboxes color is changed to maximum contrast white/black.
 					</p>
 				</div>
 
@@ -765,6 +763,15 @@
 			<label>--g_tags_to_include
 			<div class="help-tip2">
 				<p>Set this to include any of CANVAS / EMBED / IMG / OBJECT / SVG / VIDEO tags, which are normally skipped for processing text. Entries should be in capital letters.<br>Default value is empty string ('').
+				</p>
+			</div>
+			</label>
+			</label>
+
+			<label class ="vars">
+			<label>--g_font_weight_offset
+			<div class="help-tip2">
+				<p>When set to non-zero or "true" value, makes differential font weight change. The font weight of text is increased / reduced by the DIFFERENCE of font weight slider and 400 (normal font weight).<br>Default value is false.
 				</p>
 			</div>
 			</label>

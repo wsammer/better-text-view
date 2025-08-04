@@ -1,11 +1,13 @@
 {
   "name": "Better Text View",
   "description": "Makes webpage text larger and readable.",
-  "version": "7.0.9",
+  "version": "7.1.2",
   "author": "Sammer",
   "permissions": [
    "tabs",
    "storage",
+   "clipboardWrite",
+   "clipboardRead",
    "declarativeNetRequest"
   ],
   "host_permissions": [

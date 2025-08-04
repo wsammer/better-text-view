@@ -74,6 +74,10 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>Copy / paste of settings from / to site now uses the Clipboard of the OS (and the internal "#preset999" as well).<li>
+<li>The 'fast' option now has 'faster' to reduce hue correction processing time a little bit more. If some text/background/border colors appear wrong in 'faster' option, try 'fast' or remove them.</li>
+<li>New option <span id="variable">'--g_font_weight_offset'</span> which when set to non-zero value, makes differential font weight change. The font weight of text is increased / reduced by the DIFFERENCE of font weight slider and 400 (normal font weight).<br>Font Weight changes are now dynamic and no need to refresh page (except at beginning).</li>
+<li>Allow ADDING to existing list when clicking "Import whitelist / blacklist settings" after file selection. REPLACE existing list will work as old "Import settings".</li>
 <li>Set the <span id="variable">'--g_tags_to_include'</span> to include any of CANVAS / EMBED / IMG / OBJECT / SVG / VIDEO tags, which are normally skipped for processing text. Entries should be in capital letters.</li>
 <li>Setting <span id="variable">'--g_btvfont'</span> will change font for site if in Custom CSS popup, or for all sites if in All Settings. The fonts set through popup 'Font name:' option take priority over this variable.</li>
 <li>Setting <span id="variable">'--g_start3_caps'</span> to "fast" or 'fast' (with quotes) improves speed of reverse colors processing. BEWARE, the text/background colors on some sites will not be same as before if 'fast' option is set.</li>
@@ -266,6 +270,7 @@
 <li><b><span id="variable">--g_final_lightness</span> : </b> This can be set to values between 0 and 1, with value more than 0.5 indicates a light theme, less than 0.5 a dark theme. If the site has wrong theme detected, setting this variable forces the theme lightness / darkness.<br>Default value is calculated from page body and html colors.</li>
 <li><b><span id="variable">--g_btvfont</span> : </b> Setting this will change font for site if in Custom CSS popup, or for all sites if in All Settings. The fonts set through popup 'Font name:' option take priority over this variable.<br>Default value is empty string ('').</li>
 <li><b><span id="variable">--g_tags_to_include</span> : </b> Set this to include any of CANVAS / EMBED / IMG / OBJECT / SVG / VIDEO tags, which are normally skipped for processing text. Entries should be in capital letters.<br>Default value is empty string ('').</li>
+<li><b><span id="variable">--g_font_weight_offset</span> : </b> When set to non-zero or "true" value, makes differential font weight change. The font weight of text is increased / reduced by the DIFFERENCE of font weight slider and 400 (normal font weight).<br>Default value is false.</li>
 <li>Most of above variables have range between 0 to 255, but can have values outside of range. These variables allow for more 'switches', which would otherwise take up a lot of space on Settings page. They provide more customizations through a non GUI-based way.</li>
 <li>The values can be changed by applying Custom CSS for a site or setting in global CSS rules. Example CSS rule is <br><span id="code"><code>html { --g_min_bg_brightness: 99; }</code></span><br>which sets the <span id="variable">'--g_min_bg_brightness'</span> to 99 or<br><span id="code"><code>A { color: #0c0; }</code></span><br>which changes link color to green.<br></li>
 </ul>
