@@ -491,6 +491,15 @@ function addListeners()
 
 	if (doc.getElementById("readw") !== null) {
 	doc.getElementById("readw").onclick = () => {
+		let wlbak = wl.slice();
+		let wllen = wl.length;
+		let b_add = false;
+		if (wllen)
+		if (confirm('Do you want to ADD to existing list (Cancel for REPLACE to list)?')) b_add = true;
+		if (wllen && b_add)
+		if (!confirm('File '+doc.getElementById('fileselectorw').files[0].name+' will be ADDED to list. Click Cancel to avoid.')) return;
+		if (wllen && !b_add)
+		if (!confirm('File '+doc.getElementById('fileselectorw').files[0].name+' will REPLACE existing list. Click Cancel to avoid.')) return;
 		let fileSelector = doc.getElementById('fileselectorw');
 		fileSelector.addEventListener('change', (event) => { fileListw = event.target.files; });
 		let f = fileListw[0];
@@ -501,6 +510,7 @@ function addListeners()
 		let JsonObj = JSON.parse(e.target.result);
 		var items;
 		var item;
+		if (b_add) JsonObj.push(...wlbak);
 		chrome.storage.local.set({'whitelist': JsonObj});
 		chrome.storage.local.get('whitelist', items => {
 		let list = Array.from(items.whitelist);
@@ -596,6 +606,15 @@ function addListeners()
 
 	if (doc.getElementById("readb") !== null) {
 	doc.getElementById("readb").onclick = () => {
+		let blbak = bl.slice();
+		let bllen = bl.length;
+		let b_add = false;
+		if (bllen)
+		if (confirm('Do you want to ADD to existing list (Cancel for REPLACE to list)?')) b_add = true;
+		if (bllen && b_add)
+		if (!confirm('File '+doc.getElementById('fileselectorb').files[0].name+' will be ADDED to list. Click Cancel to avoid.')) return;
+		if (bllen && !b_add)
+		if (!confirm('File '+doc.getElementById('fileselectorb').files[0].name+' will REPLACE existing list. Click Cancel to avoid.')) return;
 		let fileSelector = doc.getElementById('fileselectorb');
 		fileSelector.addEventListener('change', (event) => { fileListb = event.target.files; });
 		if (typeof fileListb[0] != 'undefined') {
@@ -606,6 +625,7 @@ function addListeners()
 		let JsonObj = JSON.parse(e.target.result);
 		var items;
 		var item;
+		if (b_add) JsonObj.push(...blbak);
 		chrome.storage.local.set({'blacklist': JsonObj});
 		chrome.storage.local.get('blacklist', items => {
 		let list = Array.from(items.blacklist);
