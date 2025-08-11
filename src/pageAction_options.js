@@ -97,31 +97,33 @@ function init(tabs)
 
 	strSlider.oninput = () => {
 		strLabel.innerText = strSlider.value;
-		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
+		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
 		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 	}
-
-	sizeSlider.oninput = () => { sizeLabel.innerText = sizeSlider.value; if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); } }
-	thresholdSlider.oninput = () => { thresholdLabel.innerText = thresholdSlider.value; if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); } }
+	sizeSlider.oninput = () => {
+		sizeLabel.innerText = sizeSlider.value;
+		chrome.storage.local.set( { url: hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
+		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
+	}
+	thresholdSlider.oninput = () => {
+		thresholdLabel.innerText = thresholdSlider.value;
+		chrome.storage.local.set( { url: hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
+		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
+	}
 	brt_slider.oninput = () => {
 		brt_label.innerText = (parseInt(brt_slider.value)+50);
-		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
+		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
 		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 	}
 	con_slider.oninput = () => {
 		con_label.innerText = (parseInt(con_slider.value)+100);
-		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
+		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value/100)).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
 		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 	}
-			
 	weight_slider.oninput = () => {
 		weight_label.innerText = weight_slider.value;
-		chrome.storage.local.set( { url: hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
-		if (!WLcheck.checked) {
-			WLcheck.click();
-		} else {
-			WLcheck.click();WLcheck.click();
-		}
+		chrome.storage.local.set( { url: hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
+		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 	}
 	customCssText.oninput = () => { if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); } }
 	fontFamilyName.oninput = () => { if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); } }
@@ -134,12 +136,12 @@ function init(tabs)
 	};
 
 	fontFamily.onchange = () =>  {
-		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
+		chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
 		if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 	}
 	fontFamilyName.onkeydown = (e) => {
 		if (e.keyCode == 13) {
-			chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), aweight: weight_slider.value, afont: fontFamilyName.value } );
+			chrome.storage.local.set( { url:hostname, abrightness:  (parseInt(con_slider.value)+100)+'%', acontrast:  (parseInt(brt_slider.value)+50)+'%', azoom: Math.abs(parseFloat(strSlider.value)/100).toFixed(2), asize: sizeSlider.value, athresh: thresholdSlider.value, aweight: weight_slider.value, afont: fontFamilyName.value } );
 			if (!WLcheck.checked) { WLcheck.click(); } else { WLcheck.click();WLcheck.click(); }
 		}
 	}
@@ -743,7 +745,5 @@ function showRefreshBtn()
 async function getClipboardContents() {
 	try {
 		paste_text = await navigator.clipboard.readText();
-	} catch (err) {
-		console.error(err);
-	}
+	} catch (err) {}
 }
