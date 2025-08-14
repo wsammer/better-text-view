@@ -3841,7 +3841,7 @@ async function start(cfg, url)
 
 function changeBrightnessContrast() {
 
-	chrome.storage.local.get(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont"]).then((res) => {
+	chrome.storage.local.get(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont","awidget"]).then((res) => {
 
 	let url_g = window.location.href.indexOf('#full_url') > -1 ? window.location.href : window.location.hostname || window.location.href;
 	let url = url_g.trim();
@@ -3855,24 +3855,26 @@ function changeBrightnessContrast() {
 	let zoo = parseFloat(document.documentElement.style.getPropertyValue("--g_zoom"));
 	let fnt = document.documentElement.style.getPropertyValue("--g_btvfont");
 
-	if (url1 == url && (brt != res.abrightness || ctr != res.acontrast || zoo != parseFloat(res.azoom) || fnt != res.afont || g_size != res.asize || g_thresh != res.athresh || g_weight != res.aweight))
+	if (url1 == url && res.awidget)
 	if ((!isNaN(parseInt(res.abrightness)) && !isNaN(parseInt(res.acontrast)) && !isNaN(parseInt(res.asize)) && !isNaN(parseInt(res.athresh)) && !isNaN(parseInt(res.aweight)) && !isNaN(parseFloat(res.azoom))) || res.afont) {
 
 	g_brt = res.abrightness;
 	g_ctr = res.acontrast;
 
+	if (res.awidget.indexOf('strength') > -1)
 	if (parseFloat(res.azoom) >= 0.0099)
 		document.documentElement.style.setProperty('--g_zoom',Math.abs(parseFloat(res.azoom)));
 	else
 		document.documentElement.style.setProperty('--g_zoom',1.75);
 
+	if (res.awidget.indexOf('fontfamily') > -1)
 	if (res.afont) {
 		document.documentElement.style.setProperty('--g_btvfont',res.afont);
 		let rul = `*{font-family:var(--g_btvfont)!important;}`;
-		/**if (!g_fntRule) {
+		if (!g_fntRule) {
 			style_node.sheet.insertRule(rul,0);
 			g_fntRule = true;
-		}*/
+		}
 	} else if (g_fntRule) {
 		document.documentElement.style.setProperty('--g_btvfont','');
 		g_fntRule = false;
@@ -3884,6 +3886,8 @@ function changeBrightnessContrast() {
 		if (x < rl.length)
 			style_node.sheet.deleteRule(x);
 	}
+
+	if (/(brightness|contrast)/.test(res.awidget)) {
 
 	document.documentElement.style.setProperty('--g_brightness',g_brt);
 	document.documentElement.style.setProperty('--g_contrast', g_ctr);
@@ -3952,13 +3956,9 @@ function changeBrightnessContrast() {
 		let rsty = nsty.replace(/border-color[^\;]*/ig, 'border-color:rgba('+fgr+')!important;');
 		n.setAttribute('style',rsty);
 	}
-
-	if (g_size == undefined) {
-		g_size = res.asize;
-		g_thresh = res.athresh;
-		g_weight = res.aweight;
 	}
 
+	if (/(size|threshold|weight)/.test(res.awidget))
 	if (g_size != res.asize || g_thresh != res.athresh || g_weight != res.aweight) {
 		let c = 0, cd = 0;
 		let cc = 0;
@@ -3969,6 +3969,11 @@ function changeBrightnessContrast() {
 		g_size = res.asize;
 		g_thresh = res.athresh;
 		g_weight = res.aweight;
+
+		if (!g_skiplinks_nstart3)
+		if (!cfg.start3 || g_weight < 400)
+		if (g_weight != 400)
+			size_inc = `*{font-weight:${g_weight}!important};`;
 
 		height_inc = (1.07 + 0.225*g_size/g_thresh).toFixed(2);
 		while (c < g_thresh) {
@@ -4002,6 +4007,10 @@ function changeBrightnessContrast() {
 			line_sizes[c] = `${height_inc}em`;
 			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			f2_sizes[c] = cc2 + "px";
+			if (c > 9)
+				size_inc += "[style*='font-size: "+c+"'],[style*='font-size:"+c+"'] { "+f_sizes[c]+" }";
+			else
+				size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes[c]+" }";
 		}
 		css_node.nodeValue += size_inc;
 
@@ -4130,17 +4139,12 @@ function changeBrightnessContrast() {
 //					n.style.setProperty('font-size',f2_sizes[nsz],'important');
 					n.style.setProperty('line-height',line_sizes[nsz],'important');
 					n.setAttribute('s__',nsz);
-					if (!g_skiplinks_nstart3)
-						if (g_weight != 400)
-							n.style.setProperty('font-weight',g_weight,'important');
-						else
-							n.style.removeProperty('font-weight');
 				}
 			}
 		}
 	}
 
-	chrome.storage.local.remove(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont"]);
+	chrome.storage.local.remove(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont","awidget"]);
 	}
 
 	});
