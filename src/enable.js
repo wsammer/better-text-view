@@ -1872,7 +1872,7 @@ async function start(cfg, url)
 		s.rel = "stylesheet";
 		s.textContent = txt;
 		s.media = 'only screen and (max-width: '+window.innerWidth+'px)';
-		document.head.appendChild(s);
+		document.head.insertBefore(s,style_node);
 		m_ssdone[sheet.href] = true;
 		continue;
 		}
@@ -2291,16 +2291,16 @@ async function start(cfg, url)
 			style_node.sheet.deleteRule(x);
 		}
 	} else {
-		let fntFmly = `*{font-family:var(--g_btvfont)!important;}`;
+		let rul = `*{font-family:var(--g_btvfont)!important;}`;
 		if (cfg.fontFamily) {
 			document.documentElement.style.setProperty('--g_btvfont',cfg.fontFamilyName);
 			g_fntRule = true;
 		} else if (!g_btvfont) {
-			fntFmly = '';
+			rul = '';
 			document.documentElement.style.setProperty('--g_btvfont','');
 			g_fntRule = false;
 		}
-		style_node.sheet.insertRule(fntFmly, 0);
+		css_node.nodeValue += rul;
 	}
 
 		if (cfg.forcePlhdr && cfg.normalInc && !/\bemo\b/i.test(g_skip_css)) {
@@ -3234,7 +3234,7 @@ async function start(cfg, url)
 				bog2 = pcs.borderTopColor || pcs.borderRightColor || pcs.borderBottomColor || pcs.borderLeftColor;
 				bog2 = /^(none|0px)$/i.test(pcs.borderWidth) ? '' : bog2;
 				}
-				var fgbrt, bgbrt, fgp = false, bgp = false, bogp = false, scol;
+				var fgbrt, bgbrt, fgp = false, bgp = false, bogp = false;
 				var bfg = null,bbg = null,bbog = null;
 				let nsty = node.getAttribute('style');
 				if (nsty) {
@@ -3858,6 +3858,8 @@ function changeBrightnessContrast() {
 	if (url1 == url && res.awidget)
 	if ((!isNaN(parseInt(res.abrightness)) && !isNaN(parseInt(res.acontrast)) && !isNaN(parseInt(res.asize)) && !isNaN(parseInt(res.athresh)) && !isNaN(parseInt(res.aweight)) && !isNaN(parseFloat(res.azoom))) || res.afont) {
 
+	if (g_style_orig == undefined) g_style_orig = css_node.nodeValue;
+
 	g_brt = res.abrightness;
 	g_ctr = res.acontrast;
 
@@ -3867,12 +3869,12 @@ function changeBrightnessContrast() {
 	else
 		document.documentElement.style.setProperty('--g_zoom',1.75);
 
-	if (res.awidget.indexOf('fontfamily') > -1)
+	if (fnt != res.afont)
 	if (res.afont) {
 		document.documentElement.style.setProperty('--g_btvfont',res.afont);
 		let rul = `*{font-family:var(--g_btvfont)!important;}`;
 		if (!g_fntRule) {
-			style_node.sheet.insertRule(rul,0);
+			css_node.nodeValue += rul;
 			g_fntRule = true;
 		}
 	} else if (g_fntRule) {
@@ -3963,17 +3965,19 @@ function changeBrightnessContrast() {
 		let c = 0, cd = 0;
 		let cc = 0;
 		let height_inc = 1, size_inc = '';
-		var pcent, line_sizes = [], f_sizes = [], f2_sizes = [];
+		var pcent, line_sizes = [], f_sizes2 = [], f2_sizes2 = [];
 		let m_ssdone = {};
 
-		g_size = res.asize;
-		g_thresh = res.athresh;
-		g_weight = res.aweight;
+		g_size = parseInt(res.asize);
+		g_thresh = parseInt(res.athresh);
+		g_weight = parseInt(res.aweight);
+
+		size_inc = ' * { font-size: 1 !important; }';
 
 		if (!g_skiplinks_nstart3)
 		if (!cfg.start3 || g_weight < 400)
 		if (g_weight != 400)
-			size_inc = `*{font-weight:${g_weight}!important};`;
+			size_inc += `*{font-weight:${g_weight}!important};`;
 
 		height_inc = (1.07 + 0.225*g_size/g_thresh).toFixed(2);
 		while (c < g_thresh) {
@@ -4001,18 +4005,21 @@ function changeBrightnessContrast() {
 				size_inc += `}\n`;
 			size_inc += `[h__='${c}']{line-height:115%!important;min-height: ${height_inc}em!important}`;
 			if (!cfg.skipHeights)
-				f_sizes[c] = "font-size: " + cc2 + "px!important;line-height: " + height_inc + "em!important;";
+				f_sizes2[c] = "font-size: " + cc2 + "px!important;line-height: " + height_inc + "em!important;";
 			else
-				f_sizes[c] = "font-size: " + cc2 + "px!important;";
+				f_sizes2[c] = "font-size: " + cc2 + "px!important;";
 			line_sizes[c] = `${height_inc}em`;
 			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
-			f2_sizes[c] = cc2 + "px";
+			f2_sizes2[c] = cc2 + "px";
 			if (c > 9)
-				size_inc += "[style*='font-size: "+c+"'],[style*='font-size:"+c+"'] { "+f_sizes[c]+" }";
+				size_inc += "[style*='font-size: "+c+"'],[style*='font-size:"+c+"'] { "+f_sizes2[c]+" }";
 			else
-				size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes[c]+" }";
+				size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes2[c]+" }";
 		}
-		css_node.nodeValue += size_inc;
+		for (cd = c+1; cd < 50; cd++) {
+			size_inc += "[style*='font-size: "+cd+"'],[style*='font-size:"+cd+"'] { font-size: "+cd+"px !important; }";
+		}
+		css_node.nodeValue = g_style_orig+size_inc;
 
 		if (g_max_css_rules > 0) {
 		for (var si = 0; si < document.styleSheets.length; si++) {
@@ -4058,10 +4065,10 @@ function changeBrightnessContrast() {
 			if (/[\d\.]+.*?px/i.test(rt)) {
 			let nfz = parseInt(rt);
 			if (nfz <= g_thresh && nfz > 1) {
-			txtrul = key+' { font-size: '+f2_sizes[nfz]+' !important; }';
+			txtrul = key+' { font-size: '+f2_sizes2[nfz]+' !important; }';
 			n_rulecount++;
 			if (!cfg.ssrules) {
-				rule.style.setProperty('font-size',f2_sizes[nfz],'important');
+				rule.style.setProperty('font-size',f2_sizes2[nfz],'important');
 				m_done[key] = 3;
 			}
 			b_bdone = true;
@@ -4079,19 +4086,19 @@ function changeBrightnessContrast() {
 			if (/[\d\.]+.*?px/i.test(rt)) {
 			let nfz = parseInt(rt);
 			if (nfz <= g_thresh && nfz > 1) {
-			txtrul = key+' { '+f_sizes[nfz]+' }';
+			txtrul = key+' { '+f_sizes2[nfz]+' }';
 			n_rulecount++;
 			}
 			} else if (/[\d\.]+.*?rem/i.test(rt)) {
 			let nfz = parseInt(parseFloat(rt)*body_nfz);
 			if (nfz <= g_thresh && nfz > 1) {
-			txtrul = key+' { '+f_sizes[nfz]+' }';
+			txtrul = key+' { '+f_sizes2[nfz]+' }';
 			n_rulecount++;
 			}
 			} else if (/[\d\.]+.*?pt/i.test(rt)) {
 			let nfz = parseInt(parseFloat(rt)*1.333334);
 			if (nfz <= g_thresh && nfz > 1) {
-			txtrul = key+' { '+f_sizes[nfz]+' }';
+			txtrul = key+' { '+f_sizes2[nfz]+' }';
 			n_rulecount++;
 			}
 			}
@@ -4107,7 +4114,7 @@ function changeBrightnessContrast() {
 			if (/\d+.*?px/i.test(rt)) {
 			let fsz = parseInt(rt);
 			if (fsz > 1 && fsz <= g_thresh) {
-				txtrul = key + ' { ' + f_sizes[fsz] + ' }';
+				txtrul = key + ' { ' + f_sizes2[fsz] + ' }';
 				n_rulecount++;
 				}
 			}
@@ -4127,16 +4134,18 @@ function changeBrightnessContrast() {
 			let nc = map.get(n);
 			if (nc && nc != undefined && (b_ctext[nc] || n.hasAttribute('s__') || n.hasAttribute('h__'))) {
 				let fosz = orig_font[nc];
+				let cfz = getComputedStyle(n).fontSize;
+				if (/undefined/.test(fosz+cfz)) continue;
 				let nsz = parseInt(fosz);
 				let fsz = parseFloat(fosz);
-				if (fsz < g_thresh) {
+				if (parseFloat(cfz) <= g_thresh && fsz <= g_thresh) {
 					n.removeAttribute('h__');
 					n.removeAttribute('s__');
 					let nsty = n.getAttribute('style');
 					if (nsty == null) nsty = '';
 					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
 					n.setAttribute('style', rsty);
-//					n.style.setProperty('font-size',f2_sizes[nsz],'important');
+//					n.style.setProperty('font-size',f2_sizes2[nsz],'important');
 					n.style.setProperty('line-height',line_sizes[nsz],'important');
 					n.setAttribute('s__',nsz);
 				}
@@ -4227,7 +4236,7 @@ function changeBrightnessContrast() {
 }
 
 var timerid2;
-var g_brt, g_ctr, g_size, g_thresh, g_weight;
+var g_brt, g_ctr, g_size, g_thresh, g_weight, g_style_orig;
 
 var g_loader = null;
 if (window.top == window.self) {
