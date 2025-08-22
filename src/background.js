@@ -88,7 +88,7 @@ chrome.runtime.onInstalled.addListener(function(details){
 			'brightness': 50,
 			'contrast': 0,
 			'skipColoreds': true,
-			'skipWhites': true,
+			'skipWhites': false,
 			'skipBlack': false,
 			'forceIInv': true,
 			'doGradients': false,

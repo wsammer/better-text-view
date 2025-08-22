@@ -1422,7 +1422,7 @@ async function start(cfg, url)
 	let map = new Map();
 	let img_dat = new Map();
 	let orig_colors = {};
-	let orig_font = [];
+	let orig_font = {};
 	let toset_colors = [];
 	let m_ss = {};
 	let m_done = {};
@@ -1516,15 +1516,15 @@ async function start(cfg, url)
 
 	let style_rule = "";
 	if (cfg.forcePlhdr && cfg.forceIInv) {
-	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'],canvas,embed,img,object,svg,video,input[type='image'] { filter:var(--g_filter_invert); }";
+	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'] { filter:var(--g_filter_invert); }";
 	style_rule += "._btvinvertb_:before,._btvinverta_:after { filter:var(--g_filter_invert); }";
 	style_rule += "[style*='background-image:url'],[style*='background-image:var'],[style*='background-image: url'],[style*='background-image: var']  { filter:var(--g_filter_invert); }";
 	style_rule += "[style*='background:url'],[style*='background: url'] { filter:var(--g_filter_invert); }";
 	style_rule += "body[style*='background-image:url'],body[style*='background-image:var'],body[style*='background-image: url'],body[style*='background-image: var'] { filter:unset; }";
 	style_rule += "[style*='background-image:none'],[style*='background-image: none'] { filter:unset; }";
-	style_rule += "[style*='background-image:url'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']), [style*='background-image:var'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']), [style*='background-image: url'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']), [style*='background-image: var'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']) { filter:unset; }";
-	style_rule += "[style*='background:url'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']), [style*='background: url'] > :is(img,svg,video,input[type='image'],IMG,SVG,VIDEO,INPUT[type='image']) { filter:unset; }";
-	style_rule += "frame,iframe,FRAME,IFRAME { filter:var(--g_filter_invert); }";
+	style_rule += "[style*='background-image:url'] > :is(img,svg,video,input[type='image']), [style*='background-image:var'] > :is(img,svg,video,input[type='image']), [style*='background-image: url'] > :is(img,svg,video,input[type='image']), [style*='background-image: var'] > :is(img,svg,video,input[type='image']) { filter:unset; }";
+	style_rule += "[style*='background:url'] > :is(img,svg,video,input[type='image']), [style*='background: url'] > :is(img,svg,video,input[type='image']) { filter:unset; }";
+	style_rule += "frame,iframe { filter:var(--g_filter_invert); }";
 	style_rule += "._btvbgimageb0:before { background-image:var(--g_bg_imageb0)!important; }";
 	style_rule += "._btvbgimageb1:before { background-image:var(--g_bg_imageb1)!important; }";
 	style_rule += "._btvbgimageb2:before { background-image:var(--g_bg_imageb2)!important; }";
@@ -2300,6 +2300,7 @@ async function start(cfg, url)
 			document.documentElement.style.setProperty('--g_btvfont','');
 			g_fntRule = false;
 		}
+		style_node.sheet.insertRule(rul, 0);
 		css_node.nodeValue += rul;
 	}
 
@@ -3874,7 +3875,7 @@ function changeBrightnessContrast() {
 		document.documentElement.style.setProperty('--g_btvfont',res.afont);
 		let rul = `*{font-family:var(--g_btvfont)!important;}`;
 		if (!g_fntRule) {
-			css_node.nodeValue += rul;
+			style_node.sheet.insertRule(rul, 0);
 			g_fntRule = true;
 		}
 	} else if (g_fntRule) {
@@ -3972,8 +3973,6 @@ function changeBrightnessContrast() {
 		g_thresh = parseInt(res.athresh);
 		g_weight = parseInt(res.aweight);
 
-		size_inc = ' * { font-size: 1 !important; }';
-
 		if (!g_skiplinks_nstart3)
 		if (!cfg.start3 || g_weight < 400)
 		if (g_weight != 400)
@@ -4045,16 +4044,6 @@ function changeBrightnessContrast() {
 		let value = rule.style.cssText;
 		if (g_foot_re && /footer/i.test(key)) continue;
 		if (m_done[key] == undefined) m_done[key] = 0;
-		let b_skip = false;
-		if (!no_skip && cfg.forcePlhdr && cfg.normalInc) {
-		for (brul of g_skip_colors_classes) {
-			if (key.indexOf("."+brul) > -1) { b_skip = true;break; }
-		}
-		if (b_skip != true)
-		for (brul of g_skip_colors_ids) {
-			if (key.indexOf("#"+brul) > -1) { b_skip = true;break; }
-		}
-		}
 		if (/\b(body|html)\b/i.test(key) && b_bdone != true && g_thresh > 0 && g_size > 0 && rule.style.fontSize) {
 			var rt, rt1;
 			rt1 = rule.style.fontSize;
@@ -4121,18 +4110,24 @@ function changeBrightnessContrast() {
 		}
 		}
 		}
-		if (txtrul) {
-			style_node.sheet.insertRule(txtrul, 0);
-		}
+		if (txtrul)
+			css_node.nodeValue += txtrul;
+			//style_node.sheet.insertRule(txtrul, 0);
 
 		} catch (error) {
 		}
 		}
 		}
 
-		for (let n of nodes) {
+		var a_nodes;
+		if (window.self == window.top)
+			a_nodes = document.body.getElementsByTagName('*');
+		else
+			a_nodes = nodes;
+
+		for (let n of a_nodes) {
 			let nc = map.get(n);
-			if (nc && nc != undefined && (b_ctext[nc] || n.hasAttribute('s__') || n.hasAttribute('h__'))) {
+			if (nc && nc != undefined && n instanceof Element) {
 				let fosz = orig_font[nc];
 				let cfz = getComputedStyle(n).fontSize;
 				if (/undefined/.test(fosz+cfz)) continue;
@@ -4145,9 +4140,17 @@ function changeBrightnessContrast() {
 					if (nsty == null) nsty = '';
 					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
 					n.setAttribute('style', rsty);
-//					n.style.setProperty('font-size',f2_sizes2[nsz],'important');
+					n.style.setProperty('font-size',f2_sizes2[nsz],'important');
 					n.style.setProperty('line-height',line_sizes[nsz],'important');
 					n.setAttribute('s__',nsz);
+					b_cdone[nc] = 999;
+				} else if (b_cdone[nc] == 999) {
+					n.removeAttribute('h__');
+					n.removeAttribute('s__');
+					let nsty = n.getAttribute('style');
+					if (nsty == null) nsty = '';
+					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
+					n.setAttribute('style', rsty);
 				}
 			}
 		}
