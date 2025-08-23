@@ -2673,6 +2673,7 @@ async function start(cfg, url)
 				b_ctext[nc] = 0;
 
 			let gcs = getComputedStyle(n);
+			if (orig_font[nc] == undefined) orig_font[nc] = gcs.fontSize;
 //			if (gcs.color && !/(none|undefined)/.test(gcs.color)) orig_colors[nc] = [gcs.color,gcs.backgroundColor||gcs.background,gcs.borderTopColor||gcs.borderRightColor||gcs.borderBottomColor||gcs.borderLeftColor,gcs.borderWidth];
 			if (g_tags_to_skip.indexOf(t) > -1 || /(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src)) {
 				let x = img_dat.get(t+gcs.backgroundImage+gcs.content+gcs.src);
@@ -3491,8 +3492,6 @@ async function start(cfg, url)
 				//	doc_obs.observe(document.body, { childList: true, subtree: true });
 			}
 
-			if (orig_font[node_count] == undefined) orig_font[node_count] = style.fontSize;
-
 			if (!sk || is_oinput)
 			if (cfg.threshold > 0 && cfg.size > 0 && (!b_iimg[node_count] || b_ctext[node_count] > 0)) {
 				let nsty = node.getAttribute('style');
@@ -3876,6 +3875,7 @@ function changeBrightnessContrast() {
 		let rul = `*{font-family:var(--g_btvfont)!important;}`;
 		if (!g_fntRule) {
 			style_node.sheet.insertRule(rul, 0);
+			css_node.nodeValue += rul;
 			g_fntRule = true;
 		}
 	} else if (g_fntRule) {
@@ -4133,6 +4133,15 @@ function changeBrightnessContrast() {
 				if (/undefined/.test(fosz+cfz)) continue;
 				let nsz = parseInt(fosz);
 				let fsz = parseFloat(fosz);
+				if (g_size == 0) {
+					n.removeAttribute('h__');
+					n.removeAttribute('s__');
+					let nsty = n.getAttribute('style');
+					if (nsty == null) nsty = '';
+					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
+					n.setAttribute('style', rsty);
+					n.style.setProperty('font-size',fosz,'important');
+				} else {
 				if (parseFloat(cfz) <= g_thresh && fsz <= g_thresh) {
 					n.removeAttribute('h__');
 					n.removeAttribute('s__');
@@ -4151,6 +4160,7 @@ function changeBrightnessContrast() {
 					if (nsty == null) nsty = '';
 					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
 					n.setAttribute('style', rsty);
+				}
 				}
 			}
 		}
