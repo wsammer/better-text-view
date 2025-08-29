@@ -552,6 +552,7 @@ var g_btvfont;
 var g_tags_to_skip;
 
 var g_skiplinks_nstart3;
+var g_mutation, orig_font;
 
 const focalAnchors = {};
 focalAnchors.attrNameContainer = 'f-a-h';
@@ -1172,24 +1173,27 @@ function getCSS(cfg) {
 
 	if (cfg.size > 0 && cfg.threshold > 0) {
 		height_inc = (1.07 + 0.225*cfg.size/cfg.threshold).toFixed(2);
+		if (cfg.size < 8)
+			cd = cfg.size*2/cfg.threshold;
+		else
+			cd = 20/cfg.threshold;
 		while (c < cfg.threshold) {
 			++c;
-			cd = c;
 			if (g_skiplinks_nstart3) {
 				cc = (cfg.size*0.2) + (parseFloat(cfg.threshold*1.075) - (2*c/11))*(100+((cfg.weight+400) % 900))/900;
-				pcent = Math.abs((2.5*cfg.size) - (c*20/cfg.threshold))*(100+((cfg.weight+400) % 900))/900;
+				pcent = Math.abs((2.5*cfg.size) - (c*cd))*(100+((cfg.weight+400) % 900))/900;
 			} else {
-				cc = (cfg.size*0.2) + parseFloat(cfg.threshold*1.075) - (2*cd/11);
-				pcent = Math.abs((2.5*cfg.size) - (cd*20/cfg.threshold));
+				cc = (cfg.size*0.2) + parseFloat(cfg.threshold*1.075) - (2*c/11);
+				pcent = Math.abs((2.5*cfg.size) - (c*cd));
 			}
 			if (parseFloat(cc) < c && !g_smaller_text) { cc = c; }
 			if (parseFloat(cc) > cfg.threshold) cc = cfg.threshold;
-			let cc1 = parseInt(cc);
 			var cc2;
 			if (g_smaller_text)
-				cc2 = (cc1*(1-0.5*parseFloat(pcent)/20)).toFixed(1);
+				cc2 = (cc*(1-0.5*parseFloat(pcent)/20)).toFixed(1);
 			else
-				cc2 = (cc1*(1+parseFloat(pcent)/100)).toFixed(1);
+				cc2 = (cc*(1+parseFloat(pcent)/100)).toFixed(1);
+			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			size_inc += `[s__='${c}']{font-size: ${cc2}px!important;`;
 			if (!cfg.skipHeights)
 				size_inc += `line-height: ${height_inc}em!important;${sCaps}${dim}}\n`;
@@ -1201,12 +1205,8 @@ function getCSS(cfg) {
 			else
 				f_sizes[c] = ";font-size: " + cc2 + "px!important;"+sCaps+ dim;
 			h_sizes[c] = `${height_inc}em`;
-			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			f2_sizes[c] = cc2 + "px";
-			if (c > 9)
-				size_inc += "[style*='font-size: "+c+"'],[style*='font-size:"+c+"'] { "+f_sizes[c]+" }";
-			else
-				size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes[c]+" }";
+			size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes[c]+" }";
 		}
 	}
 	str_style = `brightness(${brght}) contrast(${ctrst})`;
@@ -1241,6 +1241,12 @@ async function loadURL(url) {
 var timerid;
 
 function isloaded() {
+	if (orig_font == undefined) {
+//		let tbb = Date.now();
+		if (document.body)
+			orig_font = Array.from(document.body.querySelectorAll('*')).map(el => getComputedStyle(el).fontSize);
+//		console.log('time taken orig font = '+(((Date.now()-tbb)/1000).toFixed(4)));
+	}
 	if (/complete/i.test(document.readyState)) {
 		clearTimeout(timerid);
 		return;
@@ -1422,7 +1428,6 @@ async function start(cfg, url)
 	let map = new Map();
 	let img_dat = new Map();
 	let orig_colors = {};
-	let orig_font = {};
 	let toset_colors = [];
 	let m_ss = {};
 	let m_done = {};
@@ -1826,7 +1831,8 @@ async function start(cfg, url)
 	let b_css_error = false;
 	let b_fast = g_start3_caps.indexOf('fast') > -1;
 	let b_faster = g_start3_caps.indexOf('faster') > -1;
-	orig_font.length = 0;
+	var node_count_begin;
+	g_style_orig = undefined;
 
 	var doc = document;
 	//m_sty['rgb(255, 255, 255)'] = 'rgb(0, 0, 0)';
@@ -2506,6 +2512,7 @@ async function start(cfg, url)
 		}
 
 		let node_count = 0;
+		node_count_begin = 0;
 		if (cfg.forceIInv && cfg.forcePlhdr) {
 		let gcs = getComputedStyle(document.body);
 		bdy_ix = -1;
@@ -2516,7 +2523,14 @@ async function start(cfg, url)
 			if (b_iimg[-2]) bdy_ix = -2;
 		}
 		}
-		if (mutation) node_count = parseInt(1000*Date.now());
+		if (mutation) {
+			node_count = parseInt(1000*Date.now());
+			node_count_begin = node_count;
+			g_mutation = true;
+		} else {
+			node_count_begin = 0;
+			g_mutation = false;
+		}
 
 		function getShadow(attr,style) {
 			let gs = style.getPropertyValue(attr);
@@ -2673,7 +2687,6 @@ async function start(cfg, url)
 				b_ctext[nc] = 0;
 
 			let gcs = getComputedStyle(n);
-			if (orig_font[nc] == undefined) orig_font[nc] = gcs.fontSize;
 //			if (gcs.color && !/(none|undefined)/.test(gcs.color)) orig_colors[nc] = [gcs.color,gcs.backgroundColor||gcs.background,gcs.borderTopColor||gcs.borderRightColor||gcs.borderBottomColor||gcs.borderLeftColor,gcs.borderWidth];
 			if (g_tags_to_skip.indexOf(t) > -1 || /(http|url)/i.test(gcs.backgroundImage+gcs.content+gcs.src)) {
 				let x = img_dat.get(t+gcs.backgroundImage+gcs.content+gcs.src);
@@ -3858,7 +3871,8 @@ function changeBrightnessContrast() {
 	if (url1 == url && res.awidget)
 	if ((!isNaN(parseInt(res.abrightness)) && !isNaN(parseInt(res.acontrast)) && !isNaN(parseInt(res.asize)) && !isNaN(parseInt(res.athresh)) && !isNaN(parseInt(res.aweight)) && !isNaN(parseFloat(res.azoom))) || res.afont) {
 
-	if (g_style_orig == undefined) g_style_orig = css_node.nodeValue;
+	if (g_style_orig == undefined)
+		g_style_orig = css_node.nodeValue;
 
 	g_brt = res.abrightness;
 	g_ctr = res.acontrast;
@@ -3978,25 +3992,29 @@ function changeBrightnessContrast() {
 		if (g_weight != 400)
 			size_inc += `*{font-weight:${g_weight}!important};`;
 
+		if (g_size > 0 && g_thresh > 0) {
 		height_inc = (1.07 + 0.225*g_size/g_thresh).toFixed(2);
+		if (g_size < 8)
+			cd = g_size*2/g_thresh;
+		else
+			cd = 20/g_thresh;
 		while (c < g_thresh) {
 			++c;
-			cd = c;
 			if (g_skiplinks_nstart3) {
 				cc = (g_size*0.2) + (parseFloat(g_thresh*1.075) - (2*c/11))*(100+((g_weight+400) % 900))/900;
-				pcent = Math.abs((2.5*g_size) - (c*20/g_thresh))*(100+((g_weight+400) % 900))/900;
+				pcent = Math.abs((2.5*g_size) - (c*cd))*(100+((g_weight+400) % 900))/900;
 			} else {
-				cc = (g_size*0.2) + parseFloat(g_thresh*1.075) - (2*cd/11);
-				pcent = Math.abs((2.5*g_size) - (cd*20/g_thresh));
+				cc = (g_size*0.2) + parseFloat(g_thresh*1.075) - (2*c/11);
+				pcent = Math.abs((2.5*g_size) - (c*cd));
 			}
 			if (parseFloat(cc) < c && !g_smaller_text) { cc = c; }
 			if (parseFloat(cc) > g_thresh) cc = g_thresh;
-			let cc1 = parseInt(cc);
 			var cc2;
 			if (g_smaller_text)
-				cc2 = (cc1*(1-0.5*parseFloat(pcent)/20)).toFixed(1);
+				cc2 = (cc*(1-0.5*parseFloat(pcent)/20)).toFixed(1);
 			else
-				cc2 = (cc1*(1+parseFloat(pcent)/100)).toFixed(1);
+				cc2 = (cc*(1+parseFloat(pcent)/100)).toFixed(1);
+			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			size_inc += `[s__='${c}']{font-size: ${cc2}px!important;`;
 			if (!cfg.skipHeights)
 				size_inc += `line-height: ${height_inc}em!important;}\n`;
@@ -4008,15 +4026,12 @@ function changeBrightnessContrast() {
 			else
 				f_sizes2[c] = "font-size: " + cc2 + "px!important;";
 			line_sizes[c] = `${height_inc}em`;
-			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			f2_sizes2[c] = cc2 + "px";
-			if (c > 9)
-				size_inc += "[style*='font-size: "+c+"'],[style*='font-size:"+c+"'] { "+f_sizes2[c]+" }";
-			else
-				size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes2[c]+" }";
+			size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes2[c]+" }";
+		}
 		}
 		for (cd = c+1; cd < 50; cd++) {
-			size_inc += "[style*='font-size: "+cd+"'],[style*='font-size:"+cd+"'] { font-size: "+cd+"px !important; }";
+			size_inc += "[style*='font-size: "+cd+"px'],[style*='font-size:"+cd+"px'] { font-size: "+cd+"px !important; }";
 		}
 		css_node.nodeValue = g_style_orig+size_inc;
 
@@ -4119,47 +4134,48 @@ function changeBrightnessContrast() {
 		}
 		}
 
-		var a_nodes;
+		var a_nodes, st_nc = 0;
 		if (window.self == window.top)
 			a_nodes = document.body.getElementsByTagName('*');
 		else
 			a_nodes = nodes;
+		if (g_mutation) st_nc = node_count_begin;
 
 		for (let n of a_nodes) {
 			let nc = map.get(n);
-			if (nc && nc != undefined && n instanceof Element) {
-				let fosz = orig_font[nc];
-				let cfz = getComputedStyle(n).fontSize;
-				if (/undefined/.test(fosz+cfz)) continue;
+			if (nc && nc != undefined) {
+				let fosz = orig_font[nc-st_nc];
+//				console.log(n.nodeName+' '+fosz+'        ---  '+n.textContent.length);
+				if (!fosz || fosz == undefined) continue;
 				let nsz = parseInt(fosz);
 				let fsz = parseFloat(fosz);
 				if (g_size == 0) {
-					n.removeAttribute('h__');
+					let nsty = n.getAttribute('style');
+					n.removeAttribute('s__');
+					if (nsty == null) nsty = '';
+					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
+					n.setAttribute('style', rsty);
+					n.style.setProperty('font-size',fosz,'important');
+					b_cdone[nc] = 111;
+				} else {
+				if (fsz <= g_thresh) {
+					n.removeAttribute('s__');
+					let nsty = n.getAttribute('style');
+					if (nsty == null) nsty = '';
+					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
+					n.setAttribute('style', rsty);
+					n.setAttribute('s__',nsz);
+					n.style.setProperty('line-height',line_sizes[nsz],'important');
+					n.style.setProperty('font-size',f2_sizes2[nsz],'important');
+					b_cdone[nc] = 999;
+				} else if (b_cdone[nc] != 111) {
 					n.removeAttribute('s__');
 					let nsty = n.getAttribute('style');
 					if (nsty == null) nsty = '';
 					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
 					n.setAttribute('style', rsty);
 					n.style.setProperty('font-size',fosz,'important');
-				} else {
-				if (parseFloat(cfz) <= g_thresh && fsz <= g_thresh) {
-					n.removeAttribute('h__');
-					n.removeAttribute('s__');
-					let nsty = n.getAttribute('style');
-					if (nsty == null) nsty = '';
-					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
-					n.setAttribute('style', rsty);
-					n.style.setProperty('font-size',f2_sizes2[nsz],'important');
-					n.style.setProperty('line-height',line_sizes[nsz],'important');
-					n.setAttribute('s__',nsz);
-					b_cdone[nc] = 999;
-				} else if (b_cdone[nc] == 999) {
-					n.removeAttribute('h__');
-					n.removeAttribute('s__');
-					let nsty = n.getAttribute('style');
-					if (nsty == null) nsty = '';
-					let rsty = nsty.replaceAll(/font-size[^\;]*?important\s*\;/g,'');
-					n.setAttribute('style', rsty);
+					b_cdone[nc] = 111;
 				}
 				}
 			}
