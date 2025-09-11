@@ -61,6 +61,8 @@ let BLresetButton   = doc.querySelector('#BLreset');
 let BLtextarea      = doc.querySelector('#BLurltext');
 let BLtbody         = doc.querySelector("#BLtbody");
 
+let kCode           = doc.querySelector("#displayKeyCode");
+
 let resetSettings   = doc.querySelector('#resetSettings');
 
 let wl = [];
@@ -293,6 +295,13 @@ function init()
 
 	if (doc.getElementById("version") !== null)
 		doc.getElementById("version").innerText = 'Version : '+chrome.runtime.getManifest().version;
+
+	kCode.textContent = "Keycode of pressed key = ";
+	window.addEventListener("keydown", keydown);
+	function keydown(e) {
+		kCode.textContent = "Keycode of pressed key = "+e.keyCode;
+	}
+
 }
 
 init();

@@ -2482,7 +2482,7 @@ async function start(cfg, url)
 				else if (e.srcElement) return e.srcElement;
 			}
 
-	const process = async (nodes, mutation = false) =>
+	const process = async (nodes, mutation = false, nodes_length = 0) =>
 	{
 		b_ctext = {};
 		b_chimg = {};
@@ -2511,8 +2511,7 @@ async function start(cfg, url)
 			nn_reg = /\<\&\%/;
 		}
 
-		let node_count = 0;
-		node_count_begin = 0;
+		var node_count;
 		if (cfg.forceIInv && cfg.forcePlhdr) {
 		let gcs = getComputedStyle(document.body);
 		bdy_ix = -1;
@@ -2524,11 +2523,12 @@ async function start(cfg, url)
 		}
 		}
 		if (mutation) {
-			node_count = parseInt(1000*Date.now());
-			node_count_begin = node_count;
+			node_count_begin = nodes_length;
+			node_count = node_count_begin;
 			g_mutation = true;
 		} else {
 			node_count_begin = 0;
+			node_count = node_count_begin;
 			g_mutation = false;
 		}
 
@@ -2761,7 +2761,6 @@ async function start(cfg, url)
 			}
 		}
 
-		let save_nc = node_count;
 		let node = doc.body;
 		let footr = null;
 		if (cfg.forcePlhdr && b_html != true) {
@@ -3072,10 +3071,7 @@ async function start(cfg, url)
 		}
 		}
 		b_idone = {};
-
 		b_dim = {};
-		node_count = save_nc;
-		node = nodes[node_count];
 		toset_colors.length = 0;
 
 		let setAttribs = node => {
@@ -3155,7 +3151,7 @@ async function start(cfg, url)
 				}
 			}
 
-			if (style.textShadow && !/(none|undefined)/.test(style.textShadow)) {
+			if (style.textShadow && !/(none|undefined)/.test(style.textShadow) && !g_n_inv) {
 				let gs2 = getShadow('text-shadow',style);
 				node.style.setProperty('text-shadow',gs2,'important');
 			}
@@ -3381,8 +3377,8 @@ async function start(cfg, url)
 					let fgr = [], fgarr = [];
 					if (style.backgroundImage && style.backgroundImage != undefined && !/(gradient|none)/i.test(style.backgroundImage)) bg_attr = 1;
 					/**
-					if (cfg.doGradients && style.backgroundImage.indexOf('gradient') > -1) {
-					if (b_cdone[node_count] != true) {
+					if (cfg.doGradients && style.backgroundImage.indexOf('gradient') > -1)
+					if (b_cdone[node_count] != true)
 						let gs2 = getGradient(style);
 						toset_colors[node_count][3] = [gs2,'important']; //node.style.setProperty('background-image',gs2,'important');
 						if (!fgp) {
@@ -3395,8 +3391,8 @@ async function start(cfg, url)
 						toset_colors[node_count][1] = ['rgba('+fgr+')','important']; //node.style.setProperty('background-color','rgba('+fgr+')','important');
 						skip_contrast = true;
 						b_cdone[node_count] = true;
-					}
-					} else {*/
+					
+					 else */
 					let fgarr2 = bg2 ? getRGBarr(bg2) : [];
 					fgarr = getRGBarr(bg);
 					if (fgarr[0] != 255-fgarr2[0] || fgarr[1] != 255-fgarr2[1] || fgarr[2] != 255-fgarr2[2])
@@ -4134,19 +4130,22 @@ function changeBrightnessContrast() {
 		}
 		}
 
-		var a_nodes, st_nc = 0;
-		if (window.self == window.top)
+		var a_nodes;
+		if (window.self == window.top || g_mutation)
 			a_nodes = document.body.getElementsByTagName('*');
 		else
-			a_nodes = nodes;
-		if (g_mutation) st_nc = node_count_begin;
+			a_nodes = nodes.slice();
+//		if (g_mutation) st_nc = node_count_begin;
 
 		for (let n of a_nodes) {
 			let nc = map.get(n);
 			if (nc && nc != undefined) {
-				let fosz = orig_font[nc-st_nc];
+				let fosz = orig_font[nc];
 //				console.log(n.nodeName+' '+fosz+'        ---  '+n.textContent.length);
-				if (!fosz || fosz == undefined) continue;
+				if (!fosz || fosz == undefined)
+					continue;
+				else if (fosz == '0px')
+					orig_font[nc] = fosz = '1px';
 				let nsz = parseInt(fosz);
 				let fsz = parseFloat(fosz);
 				if (g_size == 0) {
@@ -4207,6 +4206,7 @@ function changeBrightnessContrast() {
 		});
 
 		if(new_nodes.length) {
+			/**
 			var hi = null, dep = 9999;
 			for (let n of new_nodes) {
 				let d = topNode(n);
@@ -4224,8 +4224,13 @@ function changeBrightnessContrast() {
 					pch = pch.parentElement;
 				}
 			}
+			*/
 			b_html = false;
-			setTimeout(() => process(new_nodes, true), 15);
+			let len = nodes.length;
+			nodes.push(...new_nodes);
+			let orig_font2 = new_nodes.map(el => getComputedStyle(el).fontSize);
+			orig_font.push(...orig_font2);
+			setTimeout(() => process(new_nodes, true, len), 1);
 		}
 
 	};
