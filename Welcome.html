@@ -74,6 +74,9 @@
 		</p>
 <h4>NEW CHANGES</h4>
 <ul>
+<li>New filter rule to set hue rotation of BODY element by specified degrees when enabled.</li>
+<li>Bring back the old rule that ODD "strength" values make INPUT elements high contrast.</li>
+<li>"Input Border" and "All CAPITAL text" are changed dynamically without a "refresh/reload" of page. PLEASE NOTE that a 'refresh/reload' is recommended after any changes to popup settings.</li>
 <li>Keycode of pressed key is displayed after Version number on 'All settings' page. The keycode can be specified in the variable <span id="variable">'--g_zoom_keycode'</span> to set the key for zooming of text and spoken audio output.</li>
 <li>Changes (or 'mutations') to webpage after loading are now considered when dynamically changing text size through popup settings.</li>
 <li><b>The sizing of text when 'Font increase %' is less than 8 has been changed to keep the 'small text big' rule consistent with values more than 8. WEBSITE SETTINGS having "Font increase %" less than 8 will have different text size(s).</b><br>Sliders of font sizing now have markers for 5/10/15/20.. values.</li>
@@ -319,7 +322,8 @@
 		<li><strong>Skip links in 3 letters bold:</strong> Avoids changing links when start 3 letters bold is enabled.<br>Default value: disabled</li>
 		<li><strong>Apply custom CSS for site:</strong> Lets you enter custom CSS rules for the site.<br>Default value: disabled</li>
 		<li><strong>Process gradient colors:</strong> Enable / disable processing of background gradient colors in hue correction to keep original color pattern.<br>Default value: disabled</li>
-		<li><strong>Colorblind adjust colors:</strong> Changes text color and background to more readable color for colorblind condition.</li>
+		<li><strong>Colorblind adjust colors:</strong> Changes text color and background to more readable color for colorblind condition.<br>Default value: disabled</li>
+		<li><strong>Filter Hue Rotation:</strong> Applies the specified number of degrees to a 'hue-rotate' filter applied to the BODY element when enabled.<br>Default value: disabled</li>
 		<li><strong>All Settings</strong> Opens a tab with all the options, including the ability to activate the add-on everywhere, the global options (with in-depth tooltips), the whitelist/blacklist, and a link to this page.</li>
 		<li><strong>The calculated website background colors are used to determine if site has "Light" theme (lightness greater than 0.5) or "Dark theme" (lightness less than 0.5).<br>On some sites this calculation may result in wrong theme choice (light website calculated as "dark" theme or reverse).<br>If this happens, override this value by setting both "Dark mode" and "Reverse Colors" to enabled.( This only applies if you want to keep a "Dark" mode or "Reverse colors" on the site)</strong></li>
 		</ul>
