@@ -510,8 +510,8 @@ var t_start, t_end;
 var root_style;
 var finalLightness;
 var b_fnlLgt;
-let g_nokinput = /(checkbox|color|hidden|image|radio|range|submit)/i;
-let g_okinput = /(date|email|month|number|password|search|select|tel|text|time|url|week)/i;
+let g_input = { "checkbox" : 0, "color" : 0, "date" : 1, "email" : 1, "hidden" : 0, "image" : 0, "month" : 1, "number" : 1, "password" : 1, "radio" : 0, "range" : 0, "search" : 1, "select" : 1, "select-one" : 1, "submit" : 0, "tel" : 1, "text" : 1, "textarea" : 1, "time" : 1, "url" : 1, "week" : 1 };
+let g_einput = { "INPUT" : 1, "SELECT" : 1, "TEXT" : 1, "TEXTAREA" : 1 };
 let color_map = ['color', 'background-color', 'background', 'background-image', 'border-color', 'border-top-color', 'border-bottom-color', 'border-left-color', 'border-right-color' ];
 let m_fcol = new Map();
 let m_bcol = new Map();
@@ -1086,6 +1086,19 @@ function getCSS(cfg) {
 	if (cfg.input_border)
 		form_border = '[b__]{border:1px solid black!important}';
 
+	let hue_rotate = '';
+	if (cfg.hueRotate) {
+		let fil_exist = '';
+		let rotate = cfg.hueRotateDeg;
+		let bdy_sty = getComputedStyle(document.body);
+		if (bdy_sty && bdy_sty != undefined && bdy_sty.filter && !/(none|undefined)/.test(bdy_sty.filter)) {
+			fil_exist = bdy_sty.filter;
+		}
+		if (!rotate.trim())
+			rotate = '180';
+		hue_rotate = 'body { filter: '+fil_exist+' hue-rotate('+rotate+'deg) !important; }';
+	}
+
 	if (cfg.forcePlhdr && (cfg.contrast != 0 || cfg.brightness != 50)) {
 		g_brightness = 1.0+parseInt(cfg.contrast)/100;
 		g_contrast = 1.0 + (parseInt(cfg.brightness)-50)/100;
@@ -1216,7 +1229,7 @@ function getCSS(cfg) {
 	if (glo)
 		g_globalCss = glo;
 
-	return `${bold}${size_inc}${g_mag}${form_border}${underline}${g_globalCss}${cust}`;
+	return `${bold}${size_inc}${g_mag}${form_border}${underline}${hue_rotate}${g_globalCss}${cust}`;
 }
 
 function createElem()
@@ -1259,6 +1272,13 @@ async function init()
 	setTimeout(isloaded, 5);
 
 	if (document.getElementById('_btv_')) {
+		let cnode = document.getElementById('_btv_');
+		if (cnode && cnode != undefined) {
+			if (style_node != undefined && style_node.hasChildNodes()) {
+				style_node.removeChild(cnode);
+			}
+			cnode.remove();
+		}
 		if (g_loader != null) {
 			g_loader.remove();
 			g_loader = null;
@@ -1302,6 +1322,8 @@ async function init()
 		'input_border',
 		'fontFamily',
 		'fontFamilyName',
+		'hueRotate',
+		'hueRotateDeg',
 		'customCss',
 		'customCssText',
 		'globalCss'
@@ -1317,7 +1339,20 @@ async function init()
 
 	if (window.self != window.top) {
 		let fr = document.getElementsByTagName('HTML')[0];
-		if (fr && fr != undefined && (parseInt(fr.getBoundingClientRect().height) < 10 || parseInt(fr.getBoundingClientRect().width) < 10)) return;
+		if (fr && fr != undefined && (parseInt(fr.getBoundingClientRect().height) < 10 || parseInt(fr.getBoundingClientRect().width) < 10)) {
+			let cnode = document.getElementById('_btv_');
+			if (cnode && cnode != undefined) {
+				if (style_node != undefined && style_node.hasChildNodes()) {
+					style_node.removeChild(cnode);
+				}
+				cnode.remove();
+			}
+			if (g_loader != null) {
+				g_loader.remove();
+				g_loader = null;
+			}
+			return;
+		}
 	}
 
 	let bl  = cfg.blacklist || [];
@@ -1328,11 +1363,13 @@ async function init()
 		idx = bl.findIndex(x => x.url === url);
 
 	if (idx > -1) {
-		let cnode = document.getElementById("_btv_");
-		if (style_node.hasChildNodes()) {
-			style_node.removeChild(cnode);
+		let cnode = document.getElementById('_btv_');
+		if (cnode && cnode != undefined) {
+			if (style_node != undefined && style_node.hasChildNodes()) {
+				style_node.removeChild(cnode);
+			}
+			cnode.remove();
 		}
-		cnode.remove();
 		if (g_loader != null) {
 			g_loader.remove();
 			g_loader = null;
@@ -1351,8 +1388,13 @@ async function init()
 		if (idx > -1) {
 			cfg = wl[idx];
 		} else if (!cfg.enableEverywhere) {
-			let cnode = document.getElementById("_btv_");
-			cnode.remove();
+			let cnode = document.getElementById('_btv_');
+			if (cnode && cnode != undefined) {
+				if (style_node != undefined && style_node.hasChildNodes()) {
+					style_node.removeChild(cnode);
+				}
+				cnode.remove();
+			}
 			if (g_loader != null) {
 				g_loader.remove();
 				g_loader = null;
@@ -2918,7 +2960,7 @@ async function start(cfg, url)
 			}
 			n_c = map.get(img);
 			let cst = getComputedStyle(img);
-			if (cst.filter != 'unset' && /^(INPUT|SELECT|TEXT|TEXTAREA)$/i.test(img.nodeName) && g_okinput.test(img.type)) {
+			if (cst.filter != 'unset' && /^(INPUT|SELECT|TEXT|TEXTAREA)$/i.test(img.nodeName) && g_input[img.type]) {
 				img.style.setProperty('filter','unset');
 				continue;
 			}
@@ -3079,8 +3121,8 @@ async function start(cfg, url)
 			let tag = String(node.nodeName.toUpperCase());
 			let pnode = node.parentElement;
 			let sk = false;
-			let is_einput = /\b(INPUT|SELECT|TEXT|TEXTAREA)\b/.test(tag);
-			var style, is_oinput, is_xinput;
+			let is_einput = (g_einput[tag] == 1);
+			var style, is_okinput = false;
 
 			//if (tags_to_skip.includes(tag) || nodes_to_skip.includes(node) || (cfg.skipHeadings && hdr_tags.includes(tag))) return;
 			if (nodes_to_skip.includes(node)) return;
@@ -3096,12 +3138,10 @@ async function start(cfg, url)
 			node_count = map.get(node);
 			toset_colors[node_count] = [];
 
-			if (is_einput) {
-				is_xinput = node.type && g_nokinput.test(node.type);
-				is_oinput = node.type && g_okinput.test(node.type);
-			}
+			if (is_einput)
+				is_okinput = (g_input[node.type] == 1);
 
-			if (is_einput && is_oinput)
+			if (is_okinput)
 			if (cfg.input_border && !node.getAttribute('b__'))
 				if (!g_skiplinks_nstart3)
 					node.setAttribute('b__', '');
@@ -3501,7 +3541,7 @@ async function start(cfg, url)
 				//	doc_obs.observe(document.body, { childList: true, subtree: true });
 			}
 
-			if (!sk || is_oinput)
+			if (!sk || is_okinput)
 			if (cfg.threshold > 0 && cfg.size > 0 && (!b_iimg[node_count] || b_ctext[node_count] > 0)) {
 				let nsty = node.getAttribute('style');
 				if (nsty == null) nsty = '';
@@ -3537,7 +3577,7 @@ async function start(cfg, url)
 				}
 			}
 
-			if (cfg.threshold > 0 && (!b_iimg[node_count] || b_ctext[node_count] > 0 || (is_einput && is_oinput))) {
+			if (cfg.threshold > 0 && (!b_iimg[node_count] || b_ctext[node_count] > 0 || is_okinput)) {
 				let nsty = node.getAttribute('style');
 				if (nsty == null) nsty = '';
 				if (cfg.normalInc2 && skip_contrast != true)
@@ -3611,7 +3651,7 @@ async function start(cfg, url)
 					}
 					}
 				}
-				if (!cfg.skipHeights && !node.hasAttribute('s__') && (b_ctext[node_count] > 2 || (node.type && is_oinput)) && (b_chk[node_count] < g_max_child || (cfg.start3 && node.hasAttribute(focalAnchors.attrNameContainer) && b_chk[node_count] < g_max_child*12)))
+				if (!cfg.skipHeights && !node.hasAttribute('s__') && (b_ctext[node_count] > 2 || (node.type && is_okinput)) && (b_chk[node_count] < g_max_child || (cfg.start3 && node.hasAttribute(focalAnchors.attrNameContainer) && b_chk[node_count] < g_max_child*12)))
 					node.setAttribute('h__', 1);
 				/**if (cfg.makeCaps) {
 					if (g_eng)
@@ -3639,9 +3679,8 @@ async function start(cfg, url)
 					}
 				}
 				}
-				if (is_einput && b_dim[node_count] != true) {
+				if (is_okinput && b_dim[node_count] != true) {
 					b_dim[node_count] = true;
-					if (!is_xinput) {
 					if (!(cfg.input_border && g_skiplinks_nstart3))
 					if ((node.value || tag == 'SELECT') && style.getPropertyValue('width') && cfg.size > 0 && cfg.threshold > 0) {
 					var nwidth = style.getPropertyValue('width');
@@ -3657,9 +3696,9 @@ async function start(cfg, url)
 					if (nsty && !cfg.skipHeights)
 						node.setAttribute('style', nsty);
 					}
-					if (!node.disabled && (!toset_colors[node_count][0] || toset_colors[node_count][0] == undefined) && (is_einput || is_oinput)) {
-					let txtcolor = style.color;
-					if (txtcolor == null || txtcolor.length < 1) txtcolor = 'rgb(0,0,0)';
+					if (cfg.strength % 2 != 0 && !node.disabled) {
+					let txtcolor = (toset_colors[node_count][0] != undefined) ? toset_colors[node_count][0][0] : style.color;
+					if (!txtcolor || txtcolor == undefined || txtcolor.length < 1) txtcolor = 'rgb(0,0,0)';
 					let txt_brt = calcBrightness(getRGBarr(txtcolor));
 					let bg_color = style.backgroundColor;
 					var lgn;
@@ -3681,7 +3720,6 @@ async function start(cfg, url)
 					if (nsty == null) nsty = '';
 					if (cfg.advDimming)
 						node.style.setProperty('filter','revert','important');
-					}
 				}
 			}
 
@@ -3849,8 +3887,12 @@ async function start(cfg, url)
 	await process(nodes);
 
 function changeBrightnessContrast() {
+	var sCaps;
 
-	chrome.storage.local.get(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont","awidget"]).then((res) => {
+	let stored = ["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont","acaps","aborder","awidget"];
+	chrome.storage.local.get(stored).then((res) => {
+
+	if (res.awidget) {
 
 	let url_g = window.location.href.indexOf('#full_url') > -1 ? window.location.href : window.location.hostname || window.location.href;
 	let url = url_g.trim();
@@ -3859,13 +3901,13 @@ function changeBrightnessContrast() {
 	if (res.url != undefined && res.url)
 		url1 = res.url.trim();
 
+	if (url1 == url)
+	if ((!isNaN(parseInt(res.abrightness)) && !isNaN(parseInt(res.acontrast)) && !isNaN(parseInt(res.asize)) && !isNaN(parseInt(res.athresh)) && !isNaN(parseInt(res.aweight)) && !isNaN(parseFloat(res.azoom))) || res.afont) {
+
 	let brt = document.documentElement.style.getPropertyValue("--g_brightness");
 	let ctr = document.documentElement.style.getPropertyValue("--g_contrast");
 	let zoo = parseFloat(document.documentElement.style.getPropertyValue("--g_zoom"));
 	let fnt = document.documentElement.style.getPropertyValue("--g_btvfont");
-
-	if (url1 == url && res.awidget)
-	if ((!isNaN(parseInt(res.abrightness)) && !isNaN(parseInt(res.acontrast)) && !isNaN(parseInt(res.asize)) && !isNaN(parseInt(res.athresh)) && !isNaN(parseInt(res.aweight)) && !isNaN(parseFloat(res.azoom))) || res.afont) {
 
 	if (g_style_orig == undefined)
 		g_style_orig = css_node.nodeValue;
@@ -3878,6 +3920,15 @@ function changeBrightnessContrast() {
 		document.documentElement.style.setProperty('--g_zoom',Math.abs(parseFloat(res.azoom)));
 	else
 		document.documentElement.style.setProperty('--g_zoom',1.75);
+
+	if (res.acaps) {
+		if (g_eng)
+			sCaps = 'font-variant-caps:small-caps!important;';
+		else
+			sCaps = 'text-transform:uppercase!important;';
+	} else {
+		sCaps = '';
+	}
 
 	if (fnt != res.afont)
 	if (res.afont) {
@@ -3971,8 +4022,8 @@ function changeBrightnessContrast() {
 	}
 	}
 
-	if (/(size|threshold|weight)/.test(res.awidget))
-	if (g_size != res.asize || g_thresh != res.athresh || g_weight != res.aweight) {
+	if (/(inputBorder|makeCaps|size|threshold|weight)/.test(res.awidget))
+	if (g_size != res.asize || g_thresh != res.athresh || g_weight != res.aweight || g_caps != res.acaps || g_border != res.aborder) {
 		let c = 0, cd = 0;
 		let cc = 0;
 		let height_inc = 1, size_inc = '';
@@ -3982,6 +4033,8 @@ function changeBrightnessContrast() {
 		g_size = parseInt(res.asize);
 		g_thresh = parseInt(res.athresh);
 		g_weight = parseInt(res.aweight);
+		g_caps = res.acaps;
+		g_border = res.aborder;
 
 		if (!g_skiplinks_nstart3)
 		if (!cfg.start3 || g_weight < 400)
@@ -4013,18 +4066,20 @@ function changeBrightnessContrast() {
 			if (cc2.substr(-2,2).indexOf('.0') > -1) cc2 = parseInt(cc2);
 			size_inc += `[s__='${c}']{font-size: ${cc2}px!important;`;
 			if (!cfg.skipHeights)
-				size_inc += `line-height: ${height_inc}em!important;}\n`;
+				size_inc += `line-height: ${height_inc}em!important;${sCaps}}\n`;
 			else
-				size_inc += `}\n`;
+				size_inc += `${sCaps}}\n`;
 			size_inc += `[h__='${c}']{line-height:115%!important;min-height: ${height_inc}em!important}`;
 			if (!cfg.skipHeights)
-				f_sizes2[c] = "font-size: " + cc2 + "px!important;line-height: " + height_inc + "em!important;";
+				f_sizes2[c] = "font-size: " + cc2 + "px!important;line-height: " + height_inc + "em!important;" + sCaps;
 			else
-				f_sizes2[c] = "font-size: " + cc2 + "px!important;";
+				f_sizes2[c] = "font-size: " + cc2 + "px!important;" + sCaps;
 			line_sizes[c] = `${height_inc}em`;
 			f2_sizes2[c] = cc2 + "px";
 			size_inc += "[style*='font-size: "+c+"px'],[style*='font-size:"+c+"px'] { "+f_sizes2[c]+" }";
 		}
+		if (g_border)
+			size_inc += '[b__]{border:1px solid black!important}';
 		}
 		for (cd = c+1; cd < 50; cd++) {
 			size_inc += "[style*='font-size: "+cd+"px'],[style*='font-size:"+cd+"px'] { font-size: "+cd+"px !important; }";
@@ -4142,6 +4197,12 @@ function changeBrightnessContrast() {
 			if (nc && nc != undefined) {
 				let fosz = orig_font[nc];
 //				console.log(n.nodeName+' '+fosz+'        ---  '+n.textContent.length);
+				if (g_einput[n.nodeName.toUpperCase()] == 1)
+				if (n.type && n.type != undefined && g_input[n.type.toLowerCase()] == 1)
+					if (g_border)
+						n.setAttribute('b__','');
+					else
+						n.removeAttribute('b__');
 				if (!fosz || fosz == undefined)
 					continue;
 				else if (fosz == '0px')
@@ -4181,7 +4242,8 @@ function changeBrightnessContrast() {
 		}
 	}
 
-	chrome.storage.local.remove(["url","abrightness","acontrast","azoom","asize","athresh","aweight","afont","awidget"]);
+	chrome.storage.local.remove(stored);
+	}
 	}
 
 	});
@@ -4270,7 +4332,7 @@ function changeBrightnessContrast() {
 }
 
 var timerid2;
-var g_brt, g_ctr, g_size, g_thresh, g_weight, g_style_orig;
+var g_brt, g_ctr, g_size, g_thresh, g_weight, g_caps, g_border, g_style_orig;
 
 var g_loader = null;
 if (window.top == window.self) {
