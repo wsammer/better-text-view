@@ -296,10 +296,12 @@ function init()
 	if (doc.getElementById("version") !== null)
 		doc.getElementById("version").innerText = 'Version : '+chrome.runtime.getManifest().version;
 
-	kCode.textContent = "Keycode of pressed key = ";
+	if (kCode != null)
+		kCode.textContent = "Keycode of pressed key = ";
 	window.addEventListener("keydown", keydown);
 	function keydown(e) {
-		kCode.textContent = "Keycode of pressed key = "+e.keyCode;
+		if (kCode != null)
+			kCode.textContent = "Keycode of pressed key = "+e.keyCode;
 	}
 
 }
