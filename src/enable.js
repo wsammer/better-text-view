@@ -2911,7 +2911,7 @@ async function start(cfg, url)
 
 		if (/imp/.test(g_skip_css) || !n_total || (n_total > 0 && parseFloat(n_important/n_total) > 0.1))
 			b_imp = bg_imp = fg_imp = 'important';
-		node_count = map.get(node);
+		//node_count = map.get(node);
 		let tag = node.nodeName.toUpperCase();
 
 			var htm;
@@ -3813,28 +3813,31 @@ async function start(cfg, url)
 		};
 
 		const iterateBigArr = (arr) => {
-			var el, el_count, nc;
+			var el, el_count, nc = [];
 			if (doc_obs != undefined && doc_obs != null)
 				doc_obs.disconnect();
+			let x = 0;
 			for (el of arr) {
 				setAttribs(el);
+				nc[x] = node_count;//map.get(el);
 				if (!b_fast) {
-					nc = map.get(el);
-					if (nc && nc != undefined && toset_colors[nc] && toset_colors[nc] != undefined) {
+					if (nc[x] && nc[x] != undefined && toset_colors[nc[x]] && toset_colors[nc[x]] != undefined) {
 						for (el_count = 0; el_count < 9; el_count++) {
-							if (toset_colors[nc][el_count] && toset_colors[nc][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc][el_count][0],toset_colors[nc][el_count][1]);
+							if (toset_colors[nc[x]][el_count] && toset_colors[nc[x]][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc[x]][el_count][0],toset_colors[nc[x]][el_count][1]);
 						}
 					}
 				}
+				x++;
 			}
+			x = 0;
 			if (b_fast) {
 				for (el of arr) {
-					nc = map.get(el);
-					if (nc && nc != undefined && toset_colors[nc] && toset_colors[nc] != undefined) {
+					if (nc[x] && nc[x] != undefined && toset_colors[nc[x]] && toset_colors[nc[x]] != undefined) {
 						for (el_count = 0; el_count < 9; el_count++) {
-							if (toset_colors[nc][el_count] && toset_colors[nc][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc][el_count][0],toset_colors[nc][el_count][1]);
+							if (toset_colors[nc[x]][el_count] && toset_colors[nc[x]][el_count] != undefined) el.style.setProperty(color_map[el_count],toset_colors[nc[x]][el_count][0],toset_colors[nc[x]][el_count][1]);
 						}
 					}
+					x++;
 				}
 			}
 			if (doc_obs != undefined && doc_obs != null)
