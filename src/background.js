@@ -13,69 +13,6 @@ let title_remove = 'Remove Better Text View';
 let tabs          = new Set();
 let disabled_tabs = new Set();
 
-
-
-
-var browser = browser || chrome;
-var arrayUrlRegex = ['/.*/'];
-var blackListPattern = ['youtube.com', 'google.com', 'googlevideo.com'];
-
-function convertRegexToUrlFilter(regexArray) {
-	return regexArray.map(pattern => {
-		let parts = pattern.split('/');
-		if (parts.length > 1) {
-			let regex = parts[1];
-			regex = regex.replace(/\.\*/g, '*');
-			regex = regex.replace(/\./g, '\\.');
-			return `*${regex}*`;
-		}
-		return pattern;
-	});
-}
-
-function updateRules() {
-	const regexFilter = arrayUrlRegex[0];
-	console.log('Update Rules: ', regexFilter);
-	const rules = [];
-	const blackListDomain = blackListPattern.map(domain => {
-		return `${domain}`;
-	});
-	console.log('blackListDomain: ', blackListDomain);
-
-	rules.push({
-	id: 1,
-	priority: 1,
-	action: {
-	type: "modifyHeaders",
-	responseHeaders: [
-	{ header: "access-control-allow-origin", operation: "set", value: "*" },
-	{ header: "access-control-allow-methods", operation: "set", value: "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS" },
-	{ header: "access-control-allow-headers", operation: "set", value: "*" },
-	{ header: "access-control-expose-headers", operation: "set", value: "*" }
-	]
-	},
-	condition: {
-	regexFilter: regexFilter,
-	resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "other"],
-	excludedRequestDomains: blackListDomain,
-	excludedInitiatorDomains: blackListDomain,
-	}
-	});
-	
-
-	browser.declarativeNetRequest.updateDynamicRules({
-		removeRuleIds: [1],
-		addRules: rules
-	}, () => {
-		if (browser.runtime.lastError)
-			console.error(browser.runtime.lastError);
-		else
-			console.log('Rules updated successfully');
-	});
-
-}
-
-
 chrome.runtime.onInstalled.addListener(function(details){
 
 	if (details.reason === 'install') {
@@ -100,7 +37,6 @@ chrome.runtime.onInstalled.addListener(function(details){
 
 		chrome.tabs.create({ url: 'Welcome.html' });
 
-updateRules();
 		return;
 	}
 });
