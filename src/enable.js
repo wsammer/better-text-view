@@ -553,6 +553,7 @@ var g_tags_to_skip;
 
 var g_skiplinks_nstart3;
 var g_mutation, orig_font;
+var hue_rotate_deg, is_hue_rotated;
 
 const focalAnchors = {};
 focalAnchors.attrNameContainer = 'f-a-h';
@@ -803,10 +804,14 @@ function invertEmojis(node) {
 		let boldNum = indx2;
 		const bold = document.createElement('span');
 		bold.textContent = word.substring(0, indx2);
-		if ((/span/i.test(tag) && /filter.*invert/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert/i.test(node.parentNode.parentNode.getAttribute('style'))))
+		if ((/span/i.test(tag) && /filter.*invert/i.test(node.parentNode.getAttribute('style'))) || (/span/i.test(ptag) && /filter.*invert/i.test(node.parentNode.parentNode.getAttribute('style')))) {
 			bold.setAttribute('style', 'color:white!important;');
-		else
-			bold.setAttribute('style', 'filter:var(--g_filter_invert);color:white!important;');
+		} else {
+			if (is_hue_rotated)
+				bold.setAttribute('style', 'filter:var(--g_filter_invert)'+hue_rotate_deg+';color:white!important;');
+			else
+				bold.setAttribute('style', 'filter:var(--g_filter_invert);color:white!important;');
+		}
 		node.parentNode.insertBefore(bold, node);
 		node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum)+' '), node);
 		matches.length = 0;
@@ -1087,6 +1092,7 @@ function getCSS(cfg) {
 		form_border = '[b__]{border:1px solid black!important}';
 
 	let hue_rotate = '';
+	hue_rotate_deg = ''; is_hue_rotated = false;
 	if (cfg.hueRotate) {
 		let fil_exist = '';
 		let rotate = cfg.hueRotateDeg;
@@ -1097,6 +1103,10 @@ function getCSS(cfg) {
 		if (!rotate.trim())
 			rotate = '180';
 		hue_rotate = 'body { filter: '+fil_exist+' hue-rotate('+rotate+'deg) !important; }';
+		if (Math.abs(rotate) > 0) is_hue_rotated = true;
+		let sign = '';
+		if (rotate > 0) sign = '-';
+		hue_rotate_deg = 'hue-rotate('+sign+parseInt(rotate)+'deg)';
 	}
 
 	if (cfg.forcePlhdr && (cfg.contrast != 0 || cfg.brightness != 50)) {
@@ -1563,10 +1573,17 @@ async function start(cfg, url)
 
 	let style_rule = "";
 	if (cfg.forcePlhdr && cfg.forceIInv) {
+	if (is_hue_rotated) {
+	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'] { filter:var(--g_filter_invert)"+hue_rotate_deg+"; }";
+	style_rule += "._btvinvertb_:before,._btvinverta_:after { filter:var(--g_filter_invert); }";
+	style_rule += "[style*='background-image:url'],[style*='background-image:var'],[style*='background-image: url'],[style*='background-image: var']  { filter:var(--g_filter_invert)"+hue_rotate_deg+"; }";
+	style_rule += "[style*='background:url'],[style*='background: url'] { filter:var(--g_filter_invert)"+hue_rotate_deg+"; }";
+	} else {
 	style_rule += "CANVAS,EMBED,IMG,OBJECT,SVG,VIDEO,INPUT[type='image'] { filter:var(--g_filter_invert); }";
 	style_rule += "._btvinvertb_:before,._btvinverta_:after { filter:var(--g_filter_invert); }";
 	style_rule += "[style*='background-image:url'],[style*='background-image:var'],[style*='background-image: url'],[style*='background-image: var']  { filter:var(--g_filter_invert); }";
 	style_rule += "[style*='background:url'],[style*='background: url'] { filter:var(--g_filter_invert); }";
+	}
 	style_rule += "body[style*='background-image:url'],body[style*='background-image:var'],body[style*='background-image: url'],body[style*='background-image: var'] { filter:unset; }";
 	style_rule += "[style*='background-image:none'],[style*='background-image: none'] { filter:unset; }";
 	style_rule += "[style*='background-image:url'] > :is(img,svg,video,input[type='image']), [style*='background-image:var'] > :is(img,svg,video,input[type='image']), [style*='background-image: url'] > :is(img,svg,video,input[type='image']), [style*='background-image: var'] > :is(img,svg,video,input[type='image']) { filter:unset; }";
@@ -2306,8 +2323,12 @@ async function start(cfg, url)
 		}
 		}
 		if (cfg.forcePlhdr && cfg.forceIInv) {
-		if (rule.style.content && !/invert/i.test(rule.style.filter) && /url\(/i.test(rule.style.content))
-			rule.style.setProperty('filter','var(--g_filter_invert)',imp);
+		if (rule.style.content && !/invert/i.test(rule.style.filter) && /url\(/i.test(rule.style.content)) {
+			if (is_hue_rotated)
+				rule.style.setProperty('filter','var(--g_filter_invert)'+hue_rotate_deg,imp);
+			else
+				rule.style.setProperty('filter','var(--g_filter_invert)',imp);
+		}
 		}
 		}
 		if (!b_sec && txtrul) {
@@ -2738,6 +2759,13 @@ async function start(cfg, url)
 					b_iimg[nc] = await isImage(n, nc, img_area, gcs, b_imgforce);
 					img_dat.set(t+gcs.backgroundImage+gcs.content+gcs.src, [ b_iimg[nc],img_area[nc],b_imgforce[nc] ]);
 				}
+				if (b_iimg[nc] && is_hue_rotated && !cfg.forcePlhdr) {
+					let fil = gcs.filter;
+					if (!fil || fil == undefined) fil = '';
+					let pfil = getComputedStyle(n.parentElement).filter;
+					if (fil.indexOf('hue-rotate') < 0 && pfil.indexOf('hue-rotate') < 0)
+						n.style.setProperty('filter',hue_rotate_deg,'important');
+				}
 			} else {
 				b_iimg[nc] = false;
 			}
@@ -3029,7 +3057,10 @@ async function start(cfg, url)
 							if (cn.nodeType == Node.TEXT_NODE) {
 								let sp = document.createElement('span');
 								sp.textContent = cn.textContent;
-								sp.style.setProperty('filter','invert(1)');
+								if (is_hue_rotated)
+									sp.style.setProperty('filter','invert(1)'+hue_rotate_deg);
+								else
+									sp.style.setProperty('filter','invert(1)');
 								cncopy.push(sp);
 								continue;
 							}
@@ -3040,7 +3071,10 @@ async function start(cfg, url)
 							img.appendChild(cn);
 						}
 					}
-					img.style.setProperty('filter','var(--g_filter_invert)');
+					if (is_hue_rotated)
+						img.style.setProperty('filter','var(--g_filter_invert)'+hue_rotate_deg);
+					else
+						img.style.setProperty('filter','var(--g_filter_invert)');
 					let chldn = Array.from(img.getElementsByTagName('*'));
 					nodes_behind_inv.push(...chldn);
 					n_inv++;
