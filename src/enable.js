@@ -567,14 +567,24 @@ focalAnchors.toggleAnchorsById = function (id) {
 }
 
 focalAnchors.toggleAnchorsByRef = function (container, emoji = false, skiplinks = false, weight = 400) {
+	let nBold = 0, pcent = false, caps = false;
+	if (/[0-9]f/.test(g_start3_caps)) {
+		nBold = parseFloat(g_start3_caps);
+		pcent = true;
+		if (g_start3_caps.indexOf('fU') > -1) caps = true;
+	} else if (/[0-9]l/.test(g_start3_caps)) {
+		nBold = parseInt(g_start3_caps);
+		if (g_start3_caps.indexOf('lU') > -1) caps = true;
+	}
+
 	if (container instanceof Element && container.hasAttribute(focalAnchors.attrNameContainer)) {
-		focalAnchors.clearAnchors(container, emoji, skiplinks, weight);
+		focalAnchors.clearAnchors(container);
 	} else {
-		focalAnchors.addAnchorsToContainer(container, emoji, skiplinks, weight);
+		focalAnchors.addAnchorsToContainer(container, pcent, caps, nBold, emoji, skiplinks, weight);
 	}
 }
 
-focalAnchors.clearAnchors = function (container, emoji, skiplinks, weight) {
+focalAnchors.clearAnchors = function (container) {
 const stack = [container];
 while (stack.length > 0) {
 	const topElement = stack.pop();
@@ -609,7 +619,7 @@ while (stack.length > 0) {
 }
 
 // Add anchors to children of container, recursively.
-focalAnchors.addAnchorsToContainer = function (container, emoji, skiplinks, weight) {
+focalAnchors.addAnchorsToContainer = function (container, pcent, caps, nBold, emoji, skiplinks, weight) {
 	const stack = [container];
 	while (stack.length > 0) {
 		const topElement = stack.pop();
@@ -619,7 +629,7 @@ focalAnchors.addAnchorsToContainer = function (container, emoji, skiplinks, weig
 				if (emoji)
 					invertEmojis(node);
 				else
-					focalAnchors.injectAnchorText(node,weight);
+					focalAnchors.injectAnchorText(node,pcent,caps,nBold,weight);
 				g_s3_prev = node.nodeName;
 				node.parentNode.removeChild(node);
 			} else {
@@ -636,7 +646,7 @@ const mtrIndic = [ 2304, 2305, 2306, 2307, 2362, 2363, 2364, 2365, 2366, 2367, 2
 
 var g_s3_prev;
 let g_s3_reg = /^(a|b|del|em|i|ins|li|mark|small|strong|sub|sup)$/i;
-focalAnchors.injectAnchorText = function (node,weight) {
+focalAnchors.injectAnchorText = function (node,pcent,CAPS,nBold,weight) {
 	if (node instanceof Element && node.hasAttribute(focalAnchors.attrNameContainer)) return;
 	let txtc = node.textContent;
 	var tag = '';
@@ -654,7 +664,7 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		let word = words[wordID];
 		var boldNum, spos;
 		const bold = document.createElement('b');
-		if (g_start3_caps.substr(0,4).indexOf('line') > -1) {
+		if (sty.substr(0,4).indexOf('line') > -1) {
 		if (g_s3_reg.test(g_s3_prev) || g_s3_reg.test(node.parentNode.nodeName)) {
 			if (g_s3_reg.test(g_s3_prev) && wordID > 0 && u_fullstop.test(words[wordID-1])) {
 			spos = words[wordID].search(/\w/);
@@ -678,7 +688,7 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		} else {
 			boldNum = 0;
 		}
-		} else if (g_start3_caps.substr(0,4).indexOf('para') > -1) {
+		} else if (sty.substr(0,4).indexOf('para') > -1) {
 		if (g_s3_reg.test(g_s3_prev) || g_s3_reg.test(node.parentNode.nodeName)) {
 			boldNum = 0;
 		} else if (/\w/.test(words[0]) && wordID == 0) {
@@ -692,6 +702,19 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		} else {
 			boldNum = 0;
 		}
+		} else if (sty.substr(0,4).indexOf('word') > -1) {
+		if (/\w/.test(word)) {
+			spos = word.search(/\w/);
+			boldNum = 1;
+			caps = 'text-transform:uppercase!important;'+sty;
+		} else {
+			boldNum = 0;
+		}
+		} else if (nBold > 0) {
+			spos = 0;
+			boldNum = pcent ? parseInt(nBold*word.length) : nBold;
+			if (CAPS)
+				caps = 'text-transform:uppercase!important;'+sty;
 		} else {
 			spos = 0;
 			boldNum = Math.min(word.length,3);
@@ -718,7 +741,7 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		let word = words[wordID];
 		var boldNum, spos;
 		const bold = document.createElement('b');
-		if (g_start3_caps.substr(0,4).indexOf('line') > -1) {
+		if (sty.substr(0,4).indexOf('line') > -1) {
 		if (g_s3_reg.test(g_s3_prev) || g_s3_reg.test(node.parentNode.nodeName)) {
 			if (g_s3_reg.test(g_s3_prev) && wordID > 0 && u_fullstop.test(words[wordID-1])) {
 			spos = words[wordID].search(/\p{L}/gu);
@@ -742,7 +765,7 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		} else {
 			boldNum = 0;
 		}
-		} else if (g_start3_caps.substr(0,4).indexOf('para') > -1) {
+		} else if (sty.substr(0,4).indexOf('para') > -1) {
 		if (g_s3_reg.test(g_s3_prev) || g_s3_reg.test(node.parentNode.nodeName)) {
 			boldNum = 0;
 		} else if (words[0].search(/\p{L}/gu) > -1 && wordID == 0) {
@@ -756,6 +779,19 @@ focalAnchors.injectAnchorText = function (node,weight) {
 		} else {
 			boldNum = 0;
 		}
+		} else if (sty.substr(0,4).indexOf('word') > -1) {
+		if (word.search(/\p{L}/gu) > -1) {
+			spos = word.search(/\p{L}/gu);
+			boldNum = 1;
+			sCaps = 'text-transform:uppercase!important;'+sty;
+		} else {
+			boldNum = 0;
+		}
+		} else if (nBold > 0) {
+			spos = 0;
+			boldNum = pcent ? parseInt(nBold*word.length) : nBold;
+			if (CAPS)
+				sCaps = 'text-transform:uppercase!important;'+sty;
 		} else {
 			spos = 0;
 			boldNum = Math.min(word.length,3);
@@ -1682,10 +1718,17 @@ async function start(cfg, url)
 	}
 	if (docs.getPropertyValue('--g_start3_caps')) {
 	g_start3_caps = docs.getPropertyValue('--g_start3_caps');
-	if (/(fast|faster|line|para)/i.test(g_start3_caps))
-		g_start3_caps = g_start3_caps.replaceAll(/[\'\"]/g,'');
-	else
+	if (/(line|para|word)/i.test(g_start3_caps)) {
+		g_start3_caps = g_start3_caps.replaceAll(/[\'\"]/g,'').trim();
+	} else if (/\d(\%|\#)/.test(g_start3_caps)) {
+		let ss = g_start3_caps.replace(/.*?([\d\.]+(\%|\#)\s*).*/,`$1`);
+		let ss2 = ss.indexOf('%') > 0 ? parseFloat(ss)/100.0 + 'f' : parseInt(ss) + 'l';
+		g_start3_caps = g_start3_caps.replace(ss,ss2).trim();
+	} else if (!g_start3_caps.trim() || g_start3_caps.trim() == '0' || g_start3_caps.trim() == 'false') {
+		g_start3_caps = '';
+	} else if (!/fast/i.test(g_start3_caps)) {
 		g_start3_caps = 'font-variant-caps:small-caps!important;';
+	}
 	} else {
 	g_start3_caps = '';
 	}
